@@ -131,7 +131,9 @@ const EnrolmentOfficerFormPanel = (props) => {
             <Grid item xs={12} className={classes.item}>
               <EnrolmentVillagesPicker
                 isOfficerPanelEnabled={isEnabled}
+                isOfficerPanelEnabled={isEnabled}
                 readOnly={readOnly}
+                districts={edited.districts}
                 districts={edited.districts}
                 villages={edited.officerVillages}
                 onChange={(officerVillages) => onEditedChanged({ ...edited, officerVillages })}

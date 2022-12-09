@@ -20,7 +20,6 @@ const USER_SUMMARY_PROJECTION = [
   "clientMutationId",
 ];
 const DISTRICT_DATA_FETCH_PARAMS = "id, uuid, code, name, parent { id, uuid, name, code }";
-const DISTRICT_DATA_FETCH_PARAMS = "id, uuid, code, name, parent { id, uuid, name, code }";
 
 export const USER_PICKER_PROJECTION = ["id", "username", "iUser{id otherNames lastName}"];
 

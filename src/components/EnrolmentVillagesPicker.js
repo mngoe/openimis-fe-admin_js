@@ -3,6 +3,7 @@ import { withModulesManager, combine, useTranslations, PublishedComponent, Progr
 import DeleteIcon from "@material-ui/icons/Delete";
 import { withTheme, withStyles } from "@material-ui/core/styles";
 import { useDispatch, useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import AddIcon from "@material-ui/icons/Add";
 import {
   TableContainer,
@@ -16,6 +17,7 @@ import {
   Button,
   IconButton,
 } from "@material-ui/core";
+import { fetchDataFromDistrict, clearDistrictData } from "../actions";
 import { fetchDataFromDistrict, clearDistrictData } from "../actions";
 
 const styles = (theme) => ({
@@ -82,11 +84,13 @@ const EnrolmentVillagesPicker = (props) => {
     setItems([...items, {}]);
   };
 
+
   const onSelectParent = (item, parent) => {
     const rowItem = item;
     rowItem.parent = parent;
     setItems([...items]);
   };
+
 
   const onVillagesChange = (item, entities) => {
     const rowItem = item;
@@ -99,7 +103,7 @@ const EnrolmentVillagesPicker = (props) => {
       children: { edges },
     } = parent;
     const entities = edges?.map((edge) => edge.node) ?? [];
-<<<<<<< HEAD
+
     const savedEntities = entities.filter((entity) =>
       savedEOVillages?.some((village) => entity.uuid === village?.uuid),
     );
@@ -122,12 +126,7 @@ const EnrolmentVillagesPicker = (props) => {
     } else {
       createdRow.entities = entities;
     }
-=======
-    const createdRow = {};
 
-    createdRow.parent = parent;
-    createdRow.entities = entities;
->>>>>>> 1e53a31 (OTC-744: Removal of EO pickers, inserting villages automatically (#34))
     return createdRow;
   };
 
@@ -157,7 +156,7 @@ const EnrolmentVillagesPicker = (props) => {
 
   useEffect(() => {
     if (districts?.length) {
-<<<<<<< HEAD
+
       dispatch(fetchDataFromDistrict(pickedDistrictsUuids));
     } else setWasEmpty(true);
 
@@ -171,22 +170,7 @@ const EnrolmentVillagesPicker = (props) => {
       executeNewRows(createdRows, uniqueRows);
     }
   }, [districtMunAndVil]);
-=======
-      clearItems();
-      dispatch(fetchDataFromDistrict(pickedDistrictsUuids));
-    } else {
-      clearItems();
-    }
-  }, [districts]);
 
-  useEffect(() => {
-    if (fetchedDistrictDataFlag) {
-      const createdRows = data.map((mun) => createRow(mun));
-      const uniqueRows = createdRows.filter((row) => !items.some((i) => i.parent.uuid === row.parent.uuid));
-      executeNewRows(createdRows, uniqueRows);
-    }
-  }, [data]);
->>>>>>> 1e53a31 (OTC-744: Removal of EO pickers, inserting villages automatically (#34))
 
   useEffect(() => {
     if (isOfficerPanelEnabled) {
