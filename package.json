@@ -14,11 +14,7 @@
     "build": "rollup -c",
     "start": "rollup -c -w",
     "format": "prettier src -w",
-<<<<<<< HEAD
     "prepare":"npm run build"
-=======
-    "prepare":"yarn run build"
->>>>>>> 99724b6 (Update package.json)
   },
   "peerDependency": {
     "react-intl": "^5.8.1"
