@@ -46,6 +46,7 @@ const groupVillagesByMunicipality = (villages) => {
 
 const EnrolmentVillagesPicker = (props) => {
   const { modulesManager, readOnly, villages, onChange, classes, districts, isOfficerPanelEnabled } = props;
+<<<<<<< HEAD
   const dispatch = useDispatch();
   const [items, setItems] = useState([]);
   const { formatMessage } = useTranslations("admin.EnrolmentZonesPicker", modulesManager);
@@ -55,6 +56,14 @@ const EnrolmentVillagesPicker = (props) => {
   const [wasEmpty, setWasEmpty] = useState(false);
   const { districtMunAndVil, fetchedDistrictMunAndVil, fetchingDistrictMunAndVil, errorDistrictMunAndVil } =
     useSelector((store) => store.admin);
+=======
+  const [items, setItems] = useState([]);
+  const { formatMessage } = useTranslations("admin.EnrolmentZonesPicker", modulesManager);
+  const pickedDistrictsUuids = districts && districts.map((district) => district.uuid);
+  const dispatch = useDispatch();
+  const data = useSelector((state) => state.admin.districtMunAndVil);
+  const fetchedDistrictDataFlag = useSelector((state) => state.admin.fetchedDistrictMunAndVil);
+>>>>>>> 1e53a31 (OTC-744: Removal of EO pickers, inserting villages automatically (#34))
 
   const handleChange = (newItems) => {
     const villageIds = newItems.reduce((acc, item) => (item.entities ? acc.concat(item.entities) : acc), []);
@@ -90,6 +99,7 @@ const EnrolmentVillagesPicker = (props) => {
       children: { edges },
     } = parent;
     const entities = edges?.map((edge) => edge.node) ?? [];
+<<<<<<< HEAD
     const savedEntities = entities.filter((entity) =>
       savedEOVillages?.some((village) => entity.uuid === village?.uuid),
     );
@@ -112,6 +122,12 @@ const EnrolmentVillagesPicker = (props) => {
     } else {
       createdRow.entities = entities;
     }
+=======
+    const createdRow = {};
+
+    createdRow.parent = parent;
+    createdRow.entities = entities;
+>>>>>>> 1e53a31 (OTC-744: Removal of EO pickers, inserting villages automatically (#34))
     return createdRow;
   };
 
@@ -141,6 +157,7 @@ const EnrolmentVillagesPicker = (props) => {
 
   useEffect(() => {
     if (districts?.length) {
+<<<<<<< HEAD
       dispatch(fetchDataFromDistrict(pickedDistrictsUuids));
     } else setWasEmpty(true);
 
@@ -154,6 +171,22 @@ const EnrolmentVillagesPicker = (props) => {
       executeNewRows(createdRows, uniqueRows);
     }
   }, [districtMunAndVil]);
+=======
+      clearItems();
+      dispatch(fetchDataFromDistrict(pickedDistrictsUuids));
+    } else {
+      clearItems();
+    }
+  }, [districts]);
+
+  useEffect(() => {
+    if (fetchedDistrictDataFlag) {
+      const createdRows = data.map((mun) => createRow(mun));
+      const uniqueRows = createdRows.filter((row) => !items.some((i) => i.parent.uuid === row.parent.uuid));
+      executeNewRows(createdRows, uniqueRows);
+    }
+  }, [data]);
+>>>>>>> 1e53a31 (OTC-744: Removal of EO pickers, inserting villages automatically (#34))
 
   useEffect(() => {
     if (isOfficerPanelEnabled) {

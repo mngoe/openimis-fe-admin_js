@@ -20,6 +20,7 @@ const USER_SUMMARY_PROJECTION = [
   "clientMutationId",
 ];
 const DISTRICT_DATA_FETCH_PARAMS = "id, uuid, code, name, parent { id, uuid, name, code }";
+const DISTRICT_DATA_FETCH_PARAMS = "id, uuid, code, name, parent { id, uuid, name, code }";
 
 export const USER_PICKER_PROJECTION = ["id", "username", "iUser{id otherNames lastName}"];
 
@@ -282,6 +283,16 @@ export function fetchRegionDistricts(parent) {
   return graphql(payload, `LOCATION_REGION_DISTRICTS`);
 }
 
+export function fetchDataFromDistrict(districtUuids) {
+  const filters = [];
+  if (districtUuids) {
+    filters.push(`parent_Uuid_In: ["${districtUuids.join('", "')}"]`);
+  }
+  const payload = formatPageQuery("locations", filters, [
+    `${DISTRICT_DATA_FETCH_PARAMS}, children { edges {node {${DISTRICT_DATA_FETCH_PARAMS}}}}`,
+  ]);
+  return graphql(payload, `LOCATION_DISTRICT_DATA`);
+}
 export function fetchDataFromDistrict(districtUuids) {
   const filters = [];
   if (districtUuids) {
