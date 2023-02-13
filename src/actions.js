@@ -21,6 +21,12 @@ const USER_SUMMARY_PROJECTION = [
   "clientMutationId",
 ];
 
+const PROGRAM_SUMMARY_PROJECTION = [
+  "idProgram",
+  "nameProgram",
+  "validityDate"
+];
+
 export const USER_PICKER_PROJECTION = ["id", "username", "iUser{id otherNames lastName}"];
 
 export function fetchUsers(mm, filters = [], restrictHealthFacility = true) {
@@ -40,6 +46,11 @@ export function fetchUsers(mm, filters = [], restrictHealthFacility = true) {
 export function fetchUsersSummaries(mm, filters) {
   const payload = formatPageQueryWithCount("users", filters, USER_SUMMARY_PROJECTION);
   return graphql(payload, "ADMIN_USERS_SUMMARIES");
+}
+
+export function fetchProgramsSummaries(mm, filters) {
+  const payload = formatPageQueryWithCount("program", filters, PROGRAM_SUMMARY_PROJECTION);
+  return graphql(payload, "ADMIN_PROGRAMS_SUMMARIES");
 }
 
 export function fetchEnrolmentOfficers(mm, variables) {
@@ -127,6 +138,22 @@ export function deleteUser(mm, user, clientMutationLabel) {
         clientMutationId: mutation.clientMutationId,
         clientMutationLabel,
         userId: user.id,
+      }),
+    );
+    dispatch(fetchMutation(mutation.clientMutationId));
+  };
+}
+
+export function deleteProgram(mm, program, clientMutationLabel) {
+  const mutation = formatMutation("deleteProgram", `idProgram: ["${decodeId(program.idProgram)}"]`, clientMutationLabel);
+  // eslint-disable-next-line no-param-reassign
+  user.clientMutationId = mutation.clientMutationId;
+  return (dispatch) => {
+    dispatch(
+      graphql(mutation.payload, ["ADMIN_PROGRAM_MUTATION_REQ", "ADMIN_PROGRAM_DELETE_RESP", "ADMIN_PROGRAM_MUTATION_ERR"], {
+        clientMutationId: mutation.clientMutationId,
+        clientMutationLabel,
+        programId: program.idProgram,
       }),
     );
     dispatch(fetchMutation(mutation.clientMutationId));

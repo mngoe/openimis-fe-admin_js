@@ -11,6 +11,7 @@ import {
   Person,
   PinDrop,
   Tune,
+  FormatAlignLeft
 } from "@material-ui/icons";
 import { formatMessage, MainMenuContribution, withModulesManager, ErrorBoundary } from "@openimis/fe-core";
 import {
@@ -23,6 +24,7 @@ import {
   // RIGHT_ENROLMENTOFFICER,
   // RIGHT_CLAIMADMINISTRATOR,
   RIGHT_USERS,
+  RIGHT_PROGRAMS,
   RIGHT_LOCATIONS,
 } from "../constants";
 
@@ -45,6 +47,13 @@ class AdminMainMenu extends Component {
         text: formatMessage(this.props.intl, "admin", "menu.healthFacilities"),
         icon: <LocalHospital />,
         route: "/location/healthFacilities",
+      });
+    }
+    if (rights.includes(RIGHT_PROGRAMS)) {
+      entries.push({
+        text: formatMessage(this.props.intl, "admin", "menu.programs"),
+        icon: <FormatAlignLeft />,
+        route: "/admin/programs",
         withDivider: true,
       });
     }
