@@ -21,13 +21,10 @@
   "admin.user.UserOverview.title": "User Details",
   "admin.user.address": "Address",
   "admin.user.addNewUser.tooltip": "Add new user",
-  "admin.user.addNewProgram.tooltip": "Add new program",
   "admin.user.addNewUserTooltip": "Add new user",
   "admin.user.createUser.mutationLabel": "Create user",
   "admin.user.deleteDialog.message": "Are you sure you want to delete this user?",
-  "admin.program.deleteDialog.message": "Are you sure you want to delete this program?",
   "admin.user.deleteDialog.title": "Delete user",
-  "admin.program.deleteDialog.title": "Delete program",
   "admin.user.deleteDialog.yes.button": "Yes",
   "admin.user.deleteUser.tooltip": "Delete user",
   "admin.user.deleteUserDialog.message": "Are you sure you want to delete this user?",
@@ -50,7 +47,6 @@
   "admin.user.userRoles.placeholder": "Select User Role(s)",
   "admin.user.userRoles": "User role(s)",
   "admin.user.userSummaries": "{count} user(s) found",
-  "admin.program.programSummaries": "{count} program(s) found",
   "admin.user.userTypes": "User type(s)",
   "admin.user.userTypes.CLAIM_ADMIN": "Claim admin",
   "admin.user.userTypes.INTERACTIVE": "Interactive",
@@ -78,7 +74,5 @@
   "admin.EnrolmentOfficerPicker.loadingText": "Loading...",
   "admin.EnrolmentOfficerPicker.clearText": "Clear",
   "admin.EnrolmentOfficerPicker.openText": "Open",
-  "admin.EnrolmentOfficerPicker.closeText": "Close",
-  "admin.program.name": "Program Name",
-  "admin.program.validity": "Validity"
+  "admin.EnrolmentOfficerPicker.closeText": "Close"
 }

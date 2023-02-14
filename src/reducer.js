@@ -32,24 +32,6 @@ function reducer(
       error: null,
     },
 
-    programsSummaries: {
-      items: [],
-      isFetching: false,
-      isFetched: false,
-      fetched: null,
-      pageInfo: {
-        totalCount: 0,
-      },
-      error: null,
-    },
-
-    programs: {
-      items: [],
-      isFetching: false,
-      isFetched: false,
-      error: null,
-    },
-
     fetchingUser: false,
     fetchedUser: false,
     errorUser: null,
@@ -152,41 +134,6 @@ function reducer(
         ...state,
         usersSummaries: {
           ...state.usersSummaries,
-          isFetching: false,
-          isFetched: true,
-          fetched: null,
-          items: [],
-          error: formatGraphQLError(action.payload),
-        },
-      };
-    case "ADMIN_PROGRAMS_SUMMARIES_REQ":
-      return {
-        ...state,
-        programsSummaries: {
-          ...state.programsSummaries,
-          isFetching: true,
-          isFetched: false,
-          error: null,
-        },
-      };
-    case "ADMIN_PROGRAMS_SUMMARIES_RESP":
-      return {
-        ...state,
-        programsSummaries: {
-          ...state.programsSummaries,
-          isFetching: false,
-          isFetched: true,
-          fetched: action.meta,
-          pageInfo: pageInfo(action.payload.data.program),
-          items: parseData(action.payload.data.program),
-          error: formatGraphQLError(action.payload),
-        },
-      };
-    case "ADMIN_PROGRAMS_SUMMARIES_ERR":
-      return {
-        ...state,
-        programsSummaries: {
-          ...state.programsSummaries,
           isFetching: false,
           isFetched: true,
           fetched: null,
@@ -302,18 +249,12 @@ function reducer(
       };
     case "ADMIN_USER_MUTATION_REQ":
       return dispatchMutationReq(state, action);
-    case "ADMIN_PROGRAM_MUTATION_REQ":
-      return dispatchMutationReq(state, action);
     case "ADMIN_USER_MUTATION_ERR":
-      return dispatchMutationErr(state, action);
-    case "ADMIN_PROGRAM_MUTATION_ERR":
       return dispatchMutationErr(state, action);
     case "ADMIN_USER_UPDATE_RESP":
       return dispatchMutationResp(state, "updateUser", action);
     case "ADMIN_USER_DELETE_RESP":
       return dispatchMutationResp(state, "deleteUser", action);
-    case "ADMIN_PROGRAM_DELETE_RESP":
-      return dispatchMutationResp(state, "deleteProgram", action);
     case "ADMIN_USER_CREATE_RESP":
       return dispatchMutationResp(state, "createUser", action);
     default:

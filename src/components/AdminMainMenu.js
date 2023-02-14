@@ -53,7 +53,7 @@ class AdminMainMenu extends Component {
       entries.push({
         text: formatMessage(this.props.intl, "admin", "menu.programs"),
         icon: <FormatAlignLeft />,
-        route: "/admin/programs",
+        route: "/program/programs",
         withDivider: true,
       });
     }
