@@ -129,7 +129,8 @@ class UserForm extends Component {
         user.username &&
         user.roles?.length &&
         user.districts?.length > 0 &&
-        user.language
+        user.language &&
+        user.programs?.length > 0
       )
     )
       return false;

@@ -27,6 +27,7 @@ export const mapQueriesUserToStore = (u) => {
     u.language = u.iUser.languageId;
     u.roles = u.iUser.roles;
     u.districts = u.iUser.districts.map((d) => d.location);
+    u.programs = u.iUser.programSet.edges;
   }
   if (u.claimAdmin) {
     u.hasLogin = u.hasLogin || u.claimAdmin.hasLogin;
@@ -69,6 +70,7 @@ export const mapUserValuesToInput = (values) => {
     locationId: values.location ? decodeId(values.location.id) : null,
     language: values.language,
     roles: values.roles.map((r) => decodeId(r.id)),
+    programs: values.programs.map((p) => decodeId(p.id)),
     birthDate: values.birthDate,
     address: values.address,
     substitutionOfficerId: values.substitutionOfficer?.id ? decodeId(values.substitutionOfficer.id) : null,

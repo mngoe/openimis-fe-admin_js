@@ -46,6 +46,8 @@
   "admin.user.updateUser.mutationLabel": "Update user",
   "admin.user.userRoles.placeholder": "Select User Role(s)",
   "admin.user.userRoles": "User role(s)",
+  "admin.user.programPicker.label": "User Program(s)",
+  "admin.user.programPicker.placeholder": "Select user program(s)",
   "admin.user.userSummaries": "{count} user(s) found",
   "admin.user.userTypes": "User type(s)",
   "admin.user.userTypes.CLAIM_ADMIN": "Claim admin",

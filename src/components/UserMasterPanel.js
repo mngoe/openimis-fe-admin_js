@@ -18,7 +18,7 @@ const styles = (theme) => ({
 });
 
 const UserMasterPanel = (props) => {
-  const { classes, edited, readOnly, onEditedChanged, modulesManager, obligatoryUserFields, obligatoryEOFields } =
+  const {intl, classes, edited, readOnly, onEditedChanged, modulesManager, obligatoryUserFields, obligatoryEOFields } =
     props;
   const { formatMessage } = useTranslations("admin", modulesManager);
 
@@ -58,40 +58,40 @@ const UserMasterPanel = (props) => {
         obligatoryUserFields?.email == "H" ||
         (edited.userTypes?.includes(ENROLMENT_OFFICER_USER_TYPE) && obligatoryEOFields?.email == "H")
       ) && (
-        <Grid item xs={4} className={classes.item}>
-          <TextInput
-            module="admin"
-            type="email"
-            label="user.email"
-            required={
-              obligatoryUserFields?.email == "M" ||
-              (edited.userTypes?.includes(ENROLMENT_OFFICER_USER_TYPE) && obligatoryEOFields?.email == "M")
-            }
-            readOnly={readOnly}
-            value={edited?.email ?? ""}
-            onChange={(email) => onEditedChanged({ ...edited, email })}
-          />
-        </Grid>
-      )}
+          <Grid item xs={4} className={classes.item}>
+            <TextInput
+              module="admin"
+              type="email"
+              label="user.email"
+              required={
+                obligatoryUserFields?.email == "M" ||
+                (edited.userTypes?.includes(ENROLMENT_OFFICER_USER_TYPE) && obligatoryEOFields?.email == "M")
+              }
+              readOnly={readOnly}
+              value={edited?.email ?? ""}
+              onChange={(email) => onEditedChanged({ ...edited, email })}
+            />
+          </Grid>
+        )}
       {!(
         obligatoryUserFields?.phone == "H" ||
         (edited.userTypes?.includes(ENROLMENT_OFFICER_USER_TYPE) && obligatoryEOFields?.phone == "H")
       ) && (
-        <Grid item xs={4} className={classes.item}>
-          <TextInput
-            module="admin"
-            type="phone"
-            label="user.phone"
-            required={
-              obligatoryUserFields?.phone == "M" ||
-              (edited.userTypes?.includes(ENROLMENT_OFFICER_USER_TYPE) && obligatoryEOFields?.phone == "M")
-            }
-            readOnly={readOnly}
-            value={edited?.phoneNumber ?? ""}
-            onChange={(phoneNumber) => onEditedChanged({ ...edited, phoneNumber })}
-          />
-        </Grid>
-      )}
+          <Grid item xs={4} className={classes.item}>
+            <TextInput
+              module="admin"
+              type="phone"
+              label="user.phone"
+              required={
+                obligatoryUserFields?.phone == "M" ||
+                (edited.userTypes?.includes(ENROLMENT_OFFICER_USER_TYPE) && obligatoryEOFields?.phone == "M")
+              }
+              readOnly={readOnly}
+              value={edited?.phoneNumber ?? ""}
+              onChange={(phoneNumber) => onEditedChanged({ ...edited, phoneNumber })}
+            />
+          </Grid>
+        )}
       <Grid item xs={4} className={classes.item}>
         <PublishedComponent
           pubRef="location.HealthFacilityPicker"
@@ -143,7 +143,19 @@ const UserMasterPanel = (props) => {
           label={formatMessage("user.districts")}
         />
       </Grid>
-
+      <Grid item xs={4} className={classes.item}>
+        <PublishedComponent
+          pubRef="program.ProgramPicker"
+          name="program"
+          label={formatMessage("user.programPicker.label")}
+          placeholder={formatMessage("user.programPicker.placeholder")}
+          value={edited?.programs?? []}
+          required={true}
+          multiple={true}
+          readOnly={readOnly}
+          onChange={(programs) => onEditedChanged({ ...edited, programs})}
+        />
+      </Grid>
       <Grid item xs={12} className={classes.sectionHeader}>
         <Typography className={classes.sectionTitle}>{formatMessage("UserMasterPanel.loginDetailsTitle")}</Typography>
         <Divider variant="fullWidth" />
@@ -186,6 +198,6 @@ const UserMasterPanel = (props) => {
   );
 };
 
-const enhance = combine(withModulesManager, withTheme, withStyles(styles));
+const enhance = combine( withModulesManager, withTheme, withStyles(styles));
 
 export default enhance(UserMasterPanel);
