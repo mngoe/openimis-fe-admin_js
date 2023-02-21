@@ -195,6 +195,7 @@ export function fetchUser(mm, userId, clientMutationId) {
               lastName
               otherNames
               roles { id name }
+              programSet { edges{node{id idProgram nameProgram validityDate}}}
               healthFacility ${mm.getProjection("location.HealthFacilityPicker.projection")}
               validityFrom
               validityTo
@@ -238,7 +239,7 @@ export function fetchUserMutation(mm, clientMutationId) {
 
 export function fetchRegionDistricts(parent) {
   let filters = [`type: "D"`];
-  if (!!parent) {
+  if (parent) {
     filters.push(`parent_Uuid: "${parent.uuid}"`);
   }
   let payload = formatPageQuery("locations", filters, [
