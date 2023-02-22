@@ -27,7 +27,7 @@ export const mapQueriesUserToStore = (u) => {
     u.language = u.iUser.languageId;
     u.roles = u.iUser.roles;
     u.districts = u.iUser.districts.map((d) => d.location);
-    u.programs = u.iUser.programSet.edges;
+    u.programs = u.iUser.programSet.edges.map((p) => p.node);
   }
   if (u.claimAdmin) {
     u.hasLogin = u.hasLogin || u.claimAdmin.hasLogin;
