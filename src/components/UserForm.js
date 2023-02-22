@@ -33,8 +33,11 @@ const setupState = (props) => ({
   user: !props.userId
     ? {
         userTypes: [INTERACTIVE_USER_TYPE],
-      }
-    : props.user,
+        programs: props.user.program.edges.map((p) => p.node),
+    }:{
+      ...props.user,
+      programs: props.user.program.edges.map((p) => p.node),
+    }
 });
 
 
