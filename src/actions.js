@@ -195,7 +195,7 @@ export function fetchUser(mm, userId, clientMutationId) {
               lastName
               otherNames
               roles { id name }
-              programSet { edges{node{id idProgram nameProgram validityDate}}}
+              programSet { edges{node{id idProgram nameProgram validityDateFrom}}}
               healthFacility ${mm.getProjection("location.HealthFacilityPicker.projection")}
               validityFrom
               validityTo
