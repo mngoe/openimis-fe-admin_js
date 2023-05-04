@@ -2,6 +2,7 @@ import AdminMainMenu from "./components/AdminMainMenu";
 import UsersPage from "./pages/UsersPage";
 import UserPage from "./pages/UserPage";
 import messagesEn from "./translations/en.json";
+import messagesFr from "./translations/fr.json";
 import UserPicker from "./components/pickers/UserPicker";
 import EnrolmentOfficerPicker from "./components/pickers/EnrolmentOfficerPicker";
 import UserRolesPicker from "./components/pickers/UserRolesPicker";
@@ -14,7 +15,7 @@ const ROUTE_ADMIN_USER_OVERVIEW = "admin/users/overview";
 const ROUTE_ADMIN_USER_NEW = "admin/users/new";
 
 const DEFAULT_CONFIG = {
-  translations: [{ key: "en", messages: messagesEn }],
+  translations: [{ key: "en", messages: messagesEn }, { key: "fr", messages: messagesFr }],
   reducers: [{ key: "admin", reducer }],
   "core.Router": [
     { path: ROUTE_ADMIN_USERS, component: UsersPage },
