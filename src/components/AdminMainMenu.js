@@ -11,7 +11,8 @@ import {
   Person,
   PinDrop,
   Tune,
-  FormatAlignLeft
+  FormatAlignLeft,
+  AccountBox
 } from "@material-ui/icons";
 import { formatMessage, MainMenuContribution, withModulesManager, ErrorBoundary } from "@openimis/fe-core";
 import {
@@ -23,6 +24,7 @@ import {
   RIGHT_MEDICALITEMS,
   // RIGHT_ENROLMENTOFFICER,
   // RIGHT_CLAIMADMINISTRATOR,
+ RIGHT_USER_EDIT,
   RIGHT_USERS,
   RIGHT_PROGRAMS,
   RIGHT_LOCATIONS,
@@ -102,11 +104,19 @@ class AdminMainMenu extends Component {
       });
     }
 
-    entries.push(
-      ...this.props.modulesManager
-        .getContribs(ADMIN_MAIN_MENU_CONTRIBUTION_KEY)
-        .filter((c) => !c.filter || c.filter(rights)),
-    );
+    if (rights.includes(RIGHT_USERS)) {
+      entries.push({
+        text: formatMessage(this.props.intl, "core", "roleManagement.label"),
+        icon: <AccountBox />,
+        route: "/front/roles",
+      });
+    }
+
+    // entries.push(
+    //   ...this.props.modulesManager
+    //     .getContribs(ADMIN_MAIN_MENU_CONTRIBUTION_KEY)
+    //     .filter((c) => !c.filter || c.filter(rights)),
+    // );
 
     if (!entries.length) return null;
     return (
