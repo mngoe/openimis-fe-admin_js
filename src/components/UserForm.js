@@ -51,12 +51,12 @@ class UserForm extends Component {
     }
     if (!this.state.obligatory_user_fields) {
       this.props.fetchObligatoryUserFields();
-    } 
+    }
     if (!this.state.obligatory_eo_fields) {
       this.props.fetchObligatoryEnrolmentOfficerFields();
-    } 
+    }
   }
-  
+
 
   componentDidUpdate(prevProps) {
     if (prevProps.region_districts != this.props.region_districts) {
@@ -79,7 +79,7 @@ class UserForm extends Component {
         }));
       }
     }
-    
+
     if (!prevProps.fetchedUser && this.props.fetchedUser) {
       this.setState(setupState(this.props));
     } else if (prevProps.userId && !this.props.userId) {
@@ -135,7 +135,7 @@ class UserForm extends Component {
     )
       return false;
     if (user.password && user.password !== user.confirmPassword) return false;
-    if (user.userTypes?.includes(CLAIM_ADMIN_USER_TYPE) && !user.healthFacility) return false;
+    // if (user.userTypes?.includes(CLAIM_ADMIN_USER_TYPE) && !user.healthFacility) return false;
     if (user.userTypes?.includes(ENROLMENT_OFFICER_USER_TYPE) && !user.officerVillages) return false;
 
     if (

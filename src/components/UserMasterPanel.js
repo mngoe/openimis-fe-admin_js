@@ -23,7 +23,7 @@ const UserMasterPanel = (props) => {
   const { formatMessage } = useTranslations("admin", modulesManager);
 
   console.log(edited);
-  
+
   return (
     <Grid container direction="row">
       <Grid item xs={4} className={classes.item}>
@@ -101,10 +101,10 @@ const UserMasterPanel = (props) => {
           district={edited.districts}
           module="admin"
           readOnly={readOnly}
-          required={
-            edited.userTypes.includes(
-              CLAIM_ADMIN_USER_TYPE,
-            ) /* This field is also present in the claim administrator panel */
+          required={false
+            // edited.userTypes.includes(
+            //   CLAIM_ADMIN_USER_TYPE,
+            // ) /* This field is also present in the claim administrator panel */
           }
           onChange={(healthFacility) => onEditedChanged({ ...edited, healthFacility })}
         />
