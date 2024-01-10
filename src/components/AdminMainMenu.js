@@ -108,7 +108,7 @@ class AdminMainMenu extends Component {
       entries.push({
         text: formatMessage(this.props.intl, "core", "roleManagement.label"),
         icon: <AccountBox />,
-        route: "/front/roles",
+        route: "/roles",
       });
     }
 
