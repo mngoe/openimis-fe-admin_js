@@ -4,7 +4,6 @@
     "admin.user.programPicker.placeholder": "Selectionner le(s) programme(s) de l'utilisateur",
     "admin.mainMenu": "Administration",
     "admin.menu.products": "Paquet de bénéfices",
-    "admin.menu.healthFacilities": "Établissements de santé",
     "admin.menu.medicalServicesPrices": "Liste de prix des soins",
     "admin.menu.medicalItemsPrices": "Liste de prix des produits médicaux",
     "admin.menu.medicalServices": "Soins",
