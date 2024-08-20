@@ -9,10 +9,11 @@ import {
   LocalPharmacy,
   LocalPharmacyOutlined,
   Person,
+  People,
   PinDrop,
   Tune,
 } from "@material-ui/icons";
-import { formatMessage, MainMenuContribution, withModulesManager, ErrorBoundary } from "@openimis/fe-core";
+import { formatMessage, MainMenuContribution, withModulesManager } from "@openimis/fe-core";
 import {
   RIGHT_PRODUCTS,
   RIGHT_HEALTHFACILITIES,
@@ -27,11 +28,44 @@ import {
 } from "../constants";
 
 const ADMIN_MAIN_MENU_CONTRIBUTION_KEY = "admin.MainMenu";
+const ADMIN_VOUCHER_MAIN_MENU_CONTRIBUTION_KEY = "admin.voucher.MainMenu";
 
 class AdminMainMenu extends Component {
+  constructor(props) {
+    super(props);
+    this.isWorker = props.modulesManager.getConf("fe-core", "isWorker", false);
+  }
+
   render() {
     const { rights } = this.props;
     const entries = [];
+
+    if (this.isWorker) {
+      if (rights.includes(RIGHT_USERS)) {
+        entries.push({
+          text: formatMessage(this.props.intl, "admin", "menu.users"),
+          icon: <Person />,
+          route: "/admin/users",
+        });
+      }
+
+      entries.push(
+        ...this.props.modulesManager
+          .getContribs(ADMIN_VOUCHER_MAIN_MENU_CONTRIBUTION_KEY)
+          .filter((c) => !c.filter || c.filter(rights)),
+      );
+
+      if (!entries.length) return null;
+
+      return (
+        <MainMenuContribution
+          {...this.props}
+          header={formatMessage(this.props.intl, "admin", "mainMenu")}
+          icon={<LocationCity />}
+          entries={entries}
+        />
+      );
+    }
 
     if (rights.includes(RIGHT_PRODUCTS)) {
       entries.push({

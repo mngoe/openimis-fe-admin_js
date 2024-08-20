@@ -17,7 +17,18 @@ export const RIGHT_USER_DELETE = 121704;
 
 export const INTERACTIVE_USER_TYPE = "INTERACTIVE";
 export const ENROLMENT_OFFICER_USER_TYPE = "OFFICER";
+export const OFFICER_ROLE_IS_SYSTEM = 1;
 export const CLAIM_ADMIN_USER_TYPE = "CLAIM_ADMIN";
+export const CLAIM_ADMIN_IS_SYSTEM = 256;
+export const MODULE_NAME = "user";
+
+export const DEFAULT = {
+  RENDER_LAST_NAME_FIRST: true,
+};
+
+// https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address
+export const EMAIL_REGEX_PATTERN =
+  /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
 
 export const USER_TYPES = (rights) => {
   const baseTypes = [INTERACTIVE_USER_TYPE];

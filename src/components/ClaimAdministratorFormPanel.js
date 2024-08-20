@@ -1,9 +1,9 @@
-import React, { useState, useEffect }  from "react";
+import React, { useState, useEffect } from "react";
 import { Grid, Typography, Paper, Switch } from "@material-ui/core";
 import { withTheme, withStyles } from "@material-ui/core/styles";
 import { useTranslations, withModulesManager, combine, PublishedComponent, useGraphqlQuery } from "@openimis/fe-core";
-import { CLAIM_ADMIN_USER_TYPE } from "../constants";
-import { toggleUserType } from "../utils";
+import { CLAIM_ADMIN_USER_TYPE, CLAIM_ADMIN_IS_SYSTEM } from "../constants";
+import { toggleUserRoles, toggleSwitchButton } from "../utils";
 
 const styles = (theme) => ({
   item: theme.paper.item,
@@ -14,47 +14,63 @@ const styles = (theme) => ({
 const ClaimAdministratorFormPanel = (props) => {
   const { edited, classes, modulesManager, onEditedChanged, readOnly } = props;
   const { formatMessage } = useTranslations("admin.ClaimAdministratorFormPanel", modulesManager);
-  const isEnabled = edited.userTypes?.includes(CLAIM_ADMIN_USER_TYPE);
-
-  const has_role = !!edited.roles ? (edited.roles.filter((x) => x.isSystem == 256).length != 0) : false
-  if (isEnabled) {
-    const {isLoading, data, error: graphqlError} = useGraphqlQuery(
-      `
-      query UserRolesPicker ($system_id: Int) {
-        role(systemRoleId: $system_id) {
-          edges {
-            node {
-              id name isSystem
-            }
+  const hasClaimUserType = edited.userTypes?.includes(CLAIM_ADMIN_USER_TYPE);
+  const hasClaimRole = edited.roles
+    ? edited.roles.filter((x) => x.isSystem === CLAIM_ADMIN_IS_SYSTEM).length !== 0
+    : false;
+  const [isEnabled, setIsEnabled] = useState(false);
+  const {
+    isLoading,
+    data,
+    error: graphqlError,
+  } = useGraphqlQuery(
+    `
+    query UserRolesPicker ($system_id: Int) {
+      role(systemRoleId: $system_id) {
+        edges {
+          node {
+            id name isSystem
           }
         }
       }
-    `,
-      { system_id: 256 }, // Claim Admin System Role is 256
-    );
-    const isValid = !isLoading
-    useEffect(() => {
-      if (isValid & isEnabled & !has_role) {
-        const role = data.role.edges[0].node
-        const roles  = !!edited.roles ? edited.roles : [];
-        roles.push(role)
-        edited.roles = roles
-        onEditedChanged(edited)
-      }
-    }, [isValid]);
-  }
+    }
+  `,
+    { system_id: CLAIM_ADMIN_IS_SYSTEM },
+  );
+  const isValid = !isLoading;
+
+  useEffect(() => {
+    toggleUserRoles(
+      edited, 
+      data, 
+      isValid, 
+      isEnabled, 
+      hasClaimRole, 
+      onEditedChanged, 
+      CLAIM_ADMIN_IS_SYSTEM);
+  }, [isEnabled]);
+
+  useEffect(() => {
+    toggleSwitchButton(
+      edited, 
+      hasClaimRole, 
+      hasClaimUserType, 
+      setIsEnabled, 
+      onEditedChanged, 
+      CLAIM_ADMIN_USER_TYPE);
+  }, [hasClaimRole]);
 
   return (
     <Paper className={classes.paper}>
       <Grid item xs={12} className={classes.title}>
         <Grid container justifyContent="space-between" alignItems="center">
           <Typography variant="h6">{formatMessage("title")}</Typography>
-          {(!edited.id || !isEnabled) && (
+          {(edited || !isEnabled) && (
             <Switch
               color="secondary"
               disabled={readOnly}
               checked={isEnabled}
-              onChange={() => onEditedChanged(toggleUserType(edited, CLAIM_ADMIN_USER_TYPE))}
+              onChange={() => setIsEnabled(() => !isEnabled)}
             />
           )}
         </Grid>
@@ -69,6 +85,7 @@ const ClaimAdministratorFormPanel = (props) => {
                 module="admin"
                 label="user.dob"
                 readOnly={readOnly}
+                maxDate={new Date()}
                 onChange={(birthDate) => onEditedChanged({ ...edited, birthDate })}
               />
             </Grid>
@@ -76,6 +93,7 @@ const ClaimAdministratorFormPanel = (props) => {
               <PublishedComponent
                 pubRef="location.HealthFacilityPicker"
                 value={edited?.healthFacility}
+                district={edited?.districts}
                 required
                 module="admin"
                 readOnly={readOnly}

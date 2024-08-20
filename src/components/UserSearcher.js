@@ -2,8 +2,11 @@ import React, { Component } from "react";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import { injectIntl } from "react-intl";
+
 import { IconButton, Tooltip } from "@material-ui/core";
+import { withTheme, withStyles } from "@material-ui/core/styles";
 import { Tab as TabIcon, Delete as DeleteIcon } from "@material-ui/icons";
+
 import {
   withModulesManager,
   formatMessageWithValues,
@@ -11,63 +14,101 @@ import {
   Searcher,
   formatDateFromISO,
   ConfirmDialog,
+  decodeId,
 } from "@openimis/fe-core";
-import UserFilter from "./UserFilter";
-
 import { fetchUsersSummaries, deleteUser } from "../actions";
-import { RIGHT_USER_DELETE } from "../constants";
+import { DEFAULT, RIGHT_USER_DELETE } from "../constants";
+import UserFilter from "./UserFilter";
 
 const USER_SEARCHER_CONTRIBUTION_KEY = "user.UserSearcher";
 
-const getHeaders = () => [
-  "admin.user.username",
-  "admin.user.lastName",
-  "admin.user.otherNames",
-  "admin.user.email",
-  "admin.user.phone",
-  "admin.user.dob",
-  "",
-];
-
-const getSorts = () => [
-  ["username", true],
-  ["iUser_LastName", true],
-  ["iUser_OtherNames", true],
-  ["iUser_email", true],
-  ["iUser_Phone", true],
-  ["officer__dob", false],
-];
-
-const getAligns = () => {
-  const aligns = getHeaders().map(() => null);
-  aligns.splice(-1, 1, "right");
-  return aligns;
-};
+const styles = (theme) => ({
+  horizontalButtonContainer: theme.buttonContainer.horizontal,
+});
 
 class UserSearcher extends Component {
+  constructor(props) {
+    super(props);
+    this.renderLastNameFirst = props.modulesManager.getConf(
+      "fe-insuree",
+      "renderLastNameFirst",
+      DEFAULT.RENDER_LAST_NAME_FIRST,
+    );
+  }
+
   state = {
     deleteUser: null,
     params: {},
+    defaultParams: {},
+  };
+
+  getHeaders = () => [
+    "admin.user.username",
+    this.renderLastNameFirst ? "admin.user.lastName" : "admin.user.otherNames",
+    !this.renderLastNameFirst ? "admin.user.lastName" : "admin.user.otherNames",
+    "admin.user.email",
+    "admin.user.phone",
+    "admin.user.dob",
+    "",
+  ];
+
+  getSorts = () => [
+    ["username", true],
+    this.renderLastNameFirst ? ["iUser_LastName", true] : ["iUser_OtherNames", true],
+    !this.renderLastNameFirst ? ["iUser_LastName", true] : ["iUser_OtherNames", true],
+    ["iUser_Email", true],
+    ["iUser_Phone", true],
+    ["officer__dob", false],
+  ];
+
+  getAligns = () => {
+    const aligns = this.getHeaders().map(() => null);
+    aligns.splice(-1, 1, "right");
+    return aligns;
   };
 
   fetch = (params) => {
     this.setState({ params });
-    this.props.fetchUsersSummaries(this.props.modulesManager, params);
+    if (this.props.fetchedUserLocation) {
+      this.props.fetchUsersSummaries(this.props.modulesManager, params);
+    }
+  };
+
+  setRegionIds = (paramsArray) => {
+    const regionIds = this.props.userL0s?.map((region) => decodeId(region.id));
+    paramsArray.push(`regionIds: [${regionIds}]`);
+  };
+
+  componentDidUpdate = (prevState) => {
+    if (prevState.userL0s !== this.props.userL0s) {
+      if (this.props.userL0s && this.props.fetchedUserLocation) {
+        const prms = [...this.state.params];
+        this.setRegionIds(prms);
+        this.props.fetchUsersSummaries(this.props.modulesManager, prms);
+      }
+    }
   };
 
   filtersToQueryParams = (state) => {
     const prms = Object.keys(state.filters)
       .filter((contrib) => !!state.filters[contrib].filter)
       .map((contrib) => state.filters[contrib].filter);
-    prms.push(`first: ${state.pageSize}`);
+    if (!state.beforeCursor && !state.afterCursor) {
+      prms.push(`first: ${state.pageSize}`);
+    }
     if (state.afterCursor) {
       prms.push(`after: "${state.afterCursor}"`);
+      prms.push(`first: ${state.pageSize}`);
     }
     if (state.beforeCursor) {
       prms.push(`before: "${state.beforeCursor}"`);
+      prms.push(`last: ${state.pageSize}`);
     }
     if (state.orderBy) {
       prms.push(`orderBy: ["${state.orderBy}"]`);
+    }
+    if (this.props.fetchedUserLocation) {
+      this.setRegionIds(prms);
     }
     return prms;
   };
@@ -96,8 +137,8 @@ class UserSearcher extends Component {
   itemFormatters = () => {
     const formatters = [
       (u) => u.username,
-      (u) => this.getUserItem(u, "lastName"),
-      (u) => this.getUserItem(u, "otherNames"),
+      (u) => (this.renderLastNameFirst ? this.getUserItem(u, "lastName") : this.getUserItem(u, "otherNames")),
+      (u) => (!this.renderLastNameFirst ? this.getUserItem(u, "lastName") : this.getUserItem(u, "otherNames")),
       (u) => this.getUserItem(u, "email") || this.getUserItem(u, "emailId"),
       (u) => this.getUserItem(u, "phone"),
       (u) =>
@@ -105,7 +146,7 @@ class UserSearcher extends Component {
         formatDateFromISO(this.props.modulesManager, this.props.intl, this.getUserItem(u, "dob")),
 
       (u) => (
-        <>
+        <div className={this.props.classes.horizontalButtonContainer}>
           <Tooltip title={formatMessage(this.props.intl, "admin.user", "openNewTab")}>
             <IconButton onClick={() => this.props.onDoubleClick(u, true)}>
               <TabIcon />
@@ -113,12 +154,12 @@ class UserSearcher extends Component {
           </Tooltip>
           {this.props.rights.includes(RIGHT_USER_DELETE) && u.validityTo ? null : (
             <Tooltip title={formatMessage(this.props.intl, "admin.user", "deleteUser.tooltip")}>
-              <IconButton onClick={() => this.setState({ deleteUser: u })}>
+              <IconButton onClick={() => this.setState({ deleteUser: u })} disabled={u.validityTo}>
                 <DeleteIcon />
               </IconButton>
             </Tooltip>
           )}
-        </>
+        </div>
       ),
     ];
 
@@ -150,16 +191,16 @@ class UserSearcher extends Component {
           errorItems={errorUsers}
           contributionKey={USER_SEARCHER_CONTRIBUTION_KEY}
           tableTitle={formatMessageWithValues(intl, "admin.user", "userSummaries", {
-            count: usersPageInfo.totalCount,
+            count: usersPageInfo.totalCount?.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,"),
           })}
           fetch={this.fetch}
           rowIdentifier={(r) => r.uuid}
           filtersToQueryParams={this.filtersToQueryParams}
           defaultOrderBy="-username"
-          headers={getHeaders}
-          aligns={getAligns}
+          headers={this.getHeaders}
+          aligns={this.getAligns}
           itemFormatters={this.itemFormatters}
-          sorts={getSorts}
+          sorts={this.getSorts}
           rowDisabled={(_, i) => i.validityTo || i.clientMutationId}
           rowLocked={(_, i) => i.clientMutationId}
           onDoubleClick={onDoubleClick}
@@ -176,8 +217,12 @@ const mapStateToProps = (state) => ({
   fetchingUsers: state.admin.usersSummaries.isFetching,
   fetchedUsers: state.admin.usersSummaries.fetched,
   errorUsers: state.admin.usersSummaries.error,
+  userL0s: state.loc.userL0s ?? [],
+  fetchedUserLocation: state.loc.fetchedUserLocation,
 });
 
 const mapDispatchToProps = (dispatch) => bindActionCreators({ fetchUsersSummaries, deleteUser }, dispatch);
 
-export default withModulesManager(connect(mapStateToProps, mapDispatchToProps)(injectIntl(UserSearcher)));
+export default withModulesManager(
+  connect(mapStateToProps, mapDispatchToProps)(injectIntl(withTheme(withStyles(styles)(UserSearcher)))),
+);

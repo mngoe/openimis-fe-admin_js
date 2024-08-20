@@ -4,8 +4,10 @@ import UserPage from "./pages/UserPage";
 import messagesEn from "./translations/en.json";
 import UserPicker from "./components/pickers/UserPicker";
 import EnrolmentOfficerPicker from "./components/pickers/EnrolmentOfficerPicker";
+import SubstitutionEnrolmentOfficerPicker from "./components/pickers/SubstitutionEnrolmentOfficerPicker";
 import UserRolesPicker from "./components/pickers/UserRolesPicker";
 import UserTypesPicker from "./components/pickers/UserTypesPicker";
+import PaymentPointManagerPicker from "./components/pickers/PaymentPointManagerPicker";
 import reducer from "./reducer";
 import { USER_PICKER_PROJECTION } from "./actions";
 
@@ -28,6 +30,7 @@ const DEFAULT_CONFIG = {
   refs: [
     { key: "admin.UserPicker", ref: UserPicker },
     { key: "admin.EnrolmentOfficerPicker", ref: EnrolmentOfficerPicker },
+    { key: "admin.SubstitutionEnrolmentOfficerPicker", ref: SubstitutionEnrolmentOfficerPicker },
     { key: "admin.UserRolesPicker", ref: UserRolesPicker },
     { key: "admin.UserTypesPicker", ref: UserTypesPicker },
     {
@@ -37,13 +40,14 @@ const DEFAULT_CONFIG = {
     { key: "admin.users", ref: ROUTE_ADMIN_USERS },
     { key: "admin.userOverview", ref: ROUTE_ADMIN_USER_OVERVIEW },
     { key: "admin.userNew", ref: ROUTE_ADMIN_USER_NEW },
+    { key: "admin.PaymentPointManagerPicker", ref: PaymentPointManagerPicker },
   ],
   "invoice.SubjectAndThirdpartyPicker": [
     {
       type: "user",
       picker: UserPicker,
       pickerProjection: USER_PICKER_PROJECTION,
-    }
+    },
   ],
 };
 

@@ -65,4 +65,5 @@ None
 * `state.core.user`, to access user info (rights,...)
 
 ## Configurations Options
-None
+- `passwordGeneratorOptions`, array with possible configuration options, default:{ length: 10, isNumberRequired: true,
+      isLowerCaseRequired: true, isUpperCaseRequired: true, isSpecialSymbolRequired: true  }
