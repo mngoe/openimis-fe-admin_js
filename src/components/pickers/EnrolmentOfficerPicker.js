@@ -1,12 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Autocomplete } from "@openimis/fe-core";
+import { Autocomplete, withModulesManager } from "@openimis/fe-core";
 import { fetchEnrolmentOfficers } from "../../actions";
-
-const formatSuggestion = (p) => {
-  if (!p) return "?";
-  return [p.code, p.lastName, p.otherNames].filter(Boolean).join(" ");
-};
+import { DEFAULT } from "../../constants";
 
 const EnrolmentOfficerPicker = (props) => {
   const {
@@ -37,6 +33,23 @@ const EnrolmentOfficerPicker = (props) => {
     );
   }, [searchString]);
 
+  const formatSuggestion = (p) => {
+    const renderLastNameFirst = modulesManager.getConf(
+      "fe-insuree",
+      "renderLastNameFirst",
+      DEFAULT.RENDER_LAST_NAME_FIRST,
+    );
+
+    if (!p) return "?";
+    return [
+      p.username,
+      renderLastNameFirst ? p.lastName : p.otherNames,
+      !renderLastNameFirst ? p.lastName : p.otherNames,
+    ]
+      .filter(Boolean)
+      .join(" ");
+  };
+
   return (
     <Autocomplete
       multiple={multiple}
@@ -57,4 +70,4 @@ const EnrolmentOfficerPicker = (props) => {
   );
 };
 
-export default EnrolmentOfficerPicker;
+export default withModulesManager(EnrolmentOfficerPicker);

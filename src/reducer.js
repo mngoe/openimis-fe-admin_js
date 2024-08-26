@@ -7,8 +7,7 @@ import {
   dispatchMutationErr,
   dispatchMutationReq,
 } from "@openimis/fe-core";
-
-import { getUserTypes, mapQueriesUserToStore } from "./utils";
+import { checkRolesAndGetUserTypes, mapQueriesUserToStore } from "./utils";
 
 function reducer(
   state = {
@@ -20,6 +19,16 @@ function reducer(
       },
       error: null,
     },
+
+    substitutionEnrolmentOfficers: {
+      items: [],
+      isFetching: false,
+      pageInfo: {
+        totalCount: 0,
+      },
+      error: null,
+    },
+
 
     usersSummaries: {
       items: [],
@@ -39,8 +48,9 @@ function reducer(
     submittingMutation: false,
     mutation: {},
     reg_dst: [],
+    dst_mun_vil: [],
     obligatory_user_fields: {},
-    obligatory_eo_fields: {}
+    obligatory_eo_fields: {},
   },
   action,
 ) {
@@ -72,6 +82,33 @@ function reducer(
           error: formatGraphQLError(action.payload),
         },
       };
+    case "ADMIN_SUBSTITUTION_ENROLMENT_OFFICERS_REQ":
+      return {
+        ...state,
+        substitutionEnrolmentOfficers: {
+          ...state.substitutionEnrolmentOfficers,
+          isFetching: true,
+        },
+      };
+    case "ADMIN_SUBSTITUTION_ENROLMENT_OFFICERS_RESP":
+      return {
+        ...state,
+        substitutionEnrolmentOfficers: {
+          ...state.substitutionEnrolmentOfficers,
+          isFetching: false,
+          pageInfo: pageInfo(action.payload.data.substitutionEnrolmentOfficers),
+          items: parseData(action.payload.data.substitutionEnrolmentOfficers),
+        },
+      };
+    case "ADMIN_SUBSTITUTION_ENROLMENT_OFFICERS_ERR":
+      return {
+        ...state,
+        substitutionEnrolmentOfficers: {
+          ...state.substitutionEnrolmentOfficers,
+          isFetching: false,
+          error: formatGraphQLError(action.payload),
+        },
+      };
     case "ADMIN_USERS_REQ":
       return {
         ...state,
@@ -91,7 +128,7 @@ function reducer(
           fetched: action.meta,
           items: parseData(action.payload.data.users).map((user) => ({
             ...user,
-            userTypes: getUserTypes(user),
+            userTypes: checkRolesAndGetUserTypes(user),
           })),
           error: formatGraphQLError(action.payload),
         },
@@ -168,6 +205,14 @@ function reducer(
         fetchedUser: false,
         errorUser: formatServerError(action.payload),
       };
+    case "ADMIN_USER_OVERVIEW_CLEAR":
+      return {
+        ...state,
+        isValidating: false,
+        isValid: false,
+        user: null,
+        validationError: null,
+      };
     case "ADMIN_USER_NEW":
       return {
         ...state,
@@ -199,53 +244,231 @@ function reducer(
     case "LOCATION_REGION_DISTRICTS_CLEAR":
       return {
         ...state,
-        reg_dst: []
+        reg_dst: [],
+      };
+    case "LOCATION_DISTRICT_DATA_REQ":
+      return {
+        ...state,
+        fetchingDistrictMunAndVil: true,
+        fetchedDistrictMunAndVil: false,
+        errorDistrictMunAndVil: null,
+      };
+    case "LOCATION_DISTRICT_DATA_RESP":
+      return {
+        ...state,
+        fetchingDistrictMunAndVil: false,
+        fetchedDistrictMunAndVil: true,
+        districtMunAndVil: parseData(action.payload.data.locations || action.payload.data.locationsStr),
+        errorDistrictMunAndVil: formatGraphQLError(action.payload),
+      };
+    case "LOCATION_DISTRICT_DATA_ERR":
+      return {
+        ...state,
+        fetchingDistrictMunAndVil: false,
+        errorDistrictMunAndVil: formatServerError(action.payload),
+      };
+    case "LOCATION_DISTRICT_DATA_CLEAR":
+      return {
+        ...state,
+        districtMunAndVil: [],
       };
     case "OBLIGTORY_USER_FIELDS_REQ":
+        return {
+          ...state,
+          fetching_obligatory_user_fields: true,
+          fetched_obligatory_user_fields: false,
+          obligatory_user_fields: null,
+          errorL1s: null,
+        };
+      case "OBLIGTORY_USER_FIELDS_RESP":
+        console.log("USER FILED RESPONSE ", action.payload.data.userObligatoryFields);
+        return {
+          ...state,
+          fetching_obligatory_user_fields: false,
+          fetched_obligatory_user_fields: true,
+          obligatory_user_fields: action.payload.data.userObligatoryFields,
+          errorL1s: formatGraphQLError(action.payload),
+        };
+      case "OBLIGTORY_USER_FIELDS_ERR":
+        return {
+          ...state,
+          fetching_obligatory_user_fields: false,
+          errorL1s: formatServerError(action.payload),
+        };
+      case "OBLIGTORY_EO_FIELDS_REQ":
+        return {
+          ...state,
+          fetching_obligatory_eo_fields: true,
+          fetched_obligatory_eo_fields: false,
+          obligatory_eo_fields: null,
+          errorL1s: null,
+        };
+      case "OBLIGTORY_EO_FIELDS_RESP":
+        console.log("EO FILED RESPONSE ", action.payload.data.eoObligatoryFields);
+        return {
+          ...state,
+          fetching_obligatory_eo_fields: false,
+          fetched_obligatory_eo_fields: true,
+          obligatory_eo_fields: action.payload.data.eoObligatoryFields,
+          errorL1s: formatGraphQLError(action.payload),
+        };
+      case "OBLIGTORY_EO_FIELDS_ERR":
+        return {
+          ...state,
+          fetching_obligatory_eo_fields: false,
+          errorL1s: formatServerError(action.payload),
+        };
+    case "USERNAME_FIELDS_VALIDATION_REQ":
       return {
         ...state,
-        fetching_obligatory_user_fields: true,
-        fetched_obligatory_user_fields: false,
-        obligatory_user_fields: null,
-        errorL1s: null,
+        validationFields: {
+          ...state.validationFields,
+          username: {
+            isValidating: true,
+            isValid: false,
+            validationError: null,
+          },
+        },
       };
-    case "OBLIGTORY_USER_FIELDS_RESP":
-      console.log("USER FILED RESPONSE ", action.payload.data.userObligatoryFields)
+    case "USERNAME_FIELDS_VALIDATION_RESP":
       return {
         ...state,
-        fetching_obligatory_user_fields: false,
-        fetched_obligatory_user_fields: true,
-        obligatory_user_fields: action.payload.data.userObligatoryFields,
-        errorL1s: formatGraphQLError(action.payload),
+        validationFields: {
+          ...state.validationFields,
+          username: {
+            isValidating: false,
+            isValid: action.payload?.data.isValid,
+            validationError: formatGraphQLError(action.payload),
+          },
+        },
       };
-    case "OBLIGTORY_USER_FIELDS_ERR":
+    case "USERNAME_FIELDS_VALIDATION_ERR":
       return {
         ...state,
-        fetching_obligatory_user_fields: false,
-        errorL1s: formatServerError(action.payload),
+        validationFields: {
+          ...state.validationFields,
+          username: {
+            isValidating: false,
+            isValid: false,
+            validationError: formatServerError(action.payload),
+          },
+        },
       };
-    case "OBLIGTORY_EO_FIELDS_REQ":
+    case "USERNAME_FIELDS_VALIDATION_CLEAR":
       return {
         ...state,
-        fetching_obligatory_eo_fields: true,
-        fetched_obligatory_eo_fields: false,
-        obligatory_eo_fields: null,
-        errorL1s: null,
+        validationFields: {
+          ...state.validationFields,
+          username: {
+            isValidating: true,
+            isValid: false,
+            validationError: null,
+          },
+        },
       };
-    case "OBLIGTORY_EO_FIELDS_RESP":
-      console.log("EO FILED RESPONSE ", action.payload.data.eoObligatoryFields);
+    case "USERNAME_FIELDS_VALIDATION_SET_VALID":
       return {
         ...state,
-        fetching_obligatory_eo_fields: false,
-        fetched_obligatory_eo_fields: true,
-        obligatory_eo_fields: action.payload.data.eoObligatoryFields,
-        errorL1s: formatGraphQLError(action.payload),
+        validationFields: {
+          ...state.validationFields,
+          username: {
+            isValidating: false,
+            isValid: true,
+            validationError: null,
+          },
+        },
       };
-    case "OBLIGTORY_EO_FIELDS_ERR":
+    case "USER_EMAIL_FIELDS_VALIDATION_REQ":
       return {
         ...state,
-        fetching_obligatory_eo_fields: false,
-        errorL1s: formatServerError(action.payload),
+        validationFields: {
+          ...state.validationFields,
+          userEmail: {
+            isValidating: true,
+            isValid: false,
+            validationError: null,
+          },
+        },
+      };
+    case "USER_EMAIL_FIELDS_VALIDATION_RESP":
+      return {
+        ...state,
+        validationFields: {
+          ...state.validationFields,
+          userEmail: {
+            isValidating: false,
+            isValid: action.payload?.data.isValid,
+            validationError: formatGraphQLError(action.payload),
+          },
+        },
+      };
+    case "USER_EMAIL_FIELDS_VALIDATION_ERR":
+      return {
+        ...state,
+        validationFields: {
+          ...state.validationFields,
+          userEmail: {
+            isValidating: false,
+            isValid: false,
+            validationError: formatServerError(action.payload),
+          },
+        },
+      };
+    case "USER_EMAIL_FIELDS_VALIDATION_CLEAR":
+      return {
+        ...state,
+        validationFields: {
+          ...state.validationFields,
+          userEmail: {
+            isValidating: true,
+            isValid: false,
+            validationError: null,
+          },
+        },
+      };
+    case "USER_EMAIL_FIELDS_VALIDATION_SET_VALID":
+      return {
+        ...state,
+        validationFields: {
+          ...state.validationFields,
+          userEmail: {
+            isValidating: false,
+            isValid: true,
+            validationError: null,
+          },
+        },
+      };
+    case "USER_EMAIL_FORMAT_VALIDATION_CHECK":
+      return {
+        ...state,
+        validationFields: {
+          ...state.validationFields,
+          userEmailFormat: {
+            isInvalid: action.payload?.data?.isFormatInvalid,
+          },
+        },
+      };
+    case "USERNAME_LENGTH_FIELDS_REQ":
+      return {
+        ...state,
+        fetchingUsernameLength: true,
+        fetchedUsernameLength: false,
+        usernameLength: null,
+        errorUsernameLength: null,
+      };
+    case "USERNAME_LENGTH_FIELDS_RESP":
+      return {
+        ...state,
+        fetchingUsernameLength: false,
+        fetchedUsernameLength: true,
+        usernameLength: action.payload.data.usernameLength,
+        errorUsernameLength: formatGraphQLError(action.payload),
+      };
+    case "USERNAME_LENGTH_FIELDS_ERR":
+      return {
+        ...state,
+        fetchingUsernameLength: false,
+        errorUsernameLength: formatServerError(action.payload),
       };
     case "ADMIN_USER_MUTATION_REQ":
       return dispatchMutationReq(state, action);

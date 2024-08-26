@@ -5,17 +5,13 @@ import { Autocomplete } from "@material-ui/lab";
 import { TextField } from "@material-ui/core";
 import { withModulesManager, useDebounceCb, useTranslations } from "@openimis/fe-core";
 import { fetchUsers } from "../../actions";
+import { DEFAULT } from "../../constants";
 
 const styles = (theme) => ({
   label: {
     color: theme.palette.primary.main,
   },
 });
-
-const formatSuggestion = (p) => {
-  if (!p) return "?";
-  return [p.username, p.iUser?.lastName, p.iUser?.otherNames].filter(Boolean).join(" ");
-};
 
 const UserPicker = (props) => {
   const {
@@ -46,6 +42,23 @@ const UserPicker = (props) => {
   const handleChange = (__, value) => {
     onChange(value);
     if (!multiple) setOpen(false);
+  };
+
+  const formatSuggestion = (p) => {
+    const renderLastNameFirst = modulesManager.getConf(
+      "fe-insuree",
+      "renderLastNameFirst",
+      DEFAULT.RENDER_LAST_NAME_FIRST,
+    );
+
+    if (!p) return "?";
+    return [
+      p.username,
+      renderLastNameFirst ? p.iUser?.lastName : p.iUser?.otherNames,
+      !renderLastNameFirst ? p.iUser?.lastName : p.iUser?.otherNames,
+    ]
+      .filter(Boolean)
+      .join(" ");
   };
 
   useEffect(() => {

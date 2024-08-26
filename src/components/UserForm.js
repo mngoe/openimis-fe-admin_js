@@ -1,9 +1,11 @@
 import React, { Component } from "react";
-import { injectIntl } from "react-intl";
-import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
+import { connect } from "react-redux";
+import { injectIntl } from "react-intl";
+
 import { withTheme, withStyles } from "@material-ui/core/styles";
 import ReplayIcon from "@material-ui/icons/Replay";
+
 import {
   Helmet,
   formatMessageWithValues,
@@ -19,7 +21,16 @@ import {
 import { CLAIM_ADMIN_USER_TYPE, ENROLMENT_OFFICER_USER_TYPE, INTERACTIVE_USER_TYPE, RIGHT_USERS } from "../constants";
 import EnrolmentOfficerFormPanel from "./EnrolmentOfficerFormPanel";
 import ClaimAdministratorFormPanel from "./ClaimAdministratorFormPanel";
-import { fetchUser, createUser, fetchUserMutation, fetchRegionDistricts, clearRegionDistricts, fetchObligatoryUserFields, fetchObligatoryEnrolmentOfficerFields } from "../actions";
+import {
+  fetchUser,
+  createUser,
+  clearUser,
+  fetchUserMutation,
+  fetchRegionDistricts,
+  fetchObligatoryUserFields,
+  fetchObligatoryEnrolmentOfficerFields,
+  fetchUsernameLength,
+} from "../actions";
 import UserMasterPanel from "./UserMasterPanel";
 
 const styles = (theme) => ({
@@ -30,14 +41,14 @@ const USER_OVERVIEW_MUTATIONS_KEY = "user.UserOverview.mutations";
 
 const setupState = (props) => ({
   isLocked: false,
-  user: !props.userId
+  user: !props?.userId
     ? {
         userTypes: [INTERACTIVE_USER_TYPE],
       }
     : props.user,
+  isSaved: false,
+  reset: 0,
 });
-
-
 
 class UserForm extends Component {
   constructor(props) {
@@ -55,26 +66,30 @@ class UserForm extends Component {
     if (!this.state.obligatory_eo_fields) {
       this.props.fetchObligatoryEnrolmentOfficerFields();
     }
+    if (!this.state.usernameLength) {
+      this.props.fetchUsernameLength();
+    }
   }
 
+  componentWillUnmount() {
+    this.props.clearUser();
+  }
 
   componentDidUpdate(prevProps) {
-    if (prevProps.region_districts != this.props.region_districts) {
-      if (!!this.props.region_districts) {
+    if (prevProps.region_districts !== this.props.region_districts) {
+      if (this.props.region_districts) {
         const combined = [
-            ...(!!this.state.user.districts? this.state.user.districts : []) ,
-            ...this.props.region_districts
-        ]
-        const no_duplicates = [
-            ...new Map(
-              combined.map(x => [x.uuid, x])
-            ).values()
-        ]
-        this.state.user.districts = no_duplicates
-        this.state.user.region = []
-        this.setState((state, props) => ({
+          ...(this.state.user.districts ? this.state.user.districts : []),
+          ...this.props.region_districts,
+        ];
+
+        const noDuplicates = [...new Map(combined.map((x) => [x.uuid, x])).values()];
+
+        this.setState((prevState) => ({
           user: {
-            ...state.user
+            ...prevState.user,
+            districts: noDuplicates,
+            region: [],
           },
         }));
       }
@@ -97,25 +112,39 @@ class UserForm extends Component {
     }
   }
 
-  reload = () => {
-    const { clientMutationId } = this.props.mutation;
-    if (clientMutationId) {
-      this.props.fetchUserMutation(this.props.modulesManager, clientMutationId).then((res) => {
-        const mutationLogs = parseData(res.payload.data.mutationLogs);
-        if (
-          mutationLogs &&
-          mutationLogs[0] &&
-          mutationLogs[0].users &&
-          mutationLogs[0].users[0] &&
-          mutationLogs[0].users[0].coreUser
-        ) {
-          const { id } = parseData(res.payload.data.mutationLogs)[0].users[0].coreUser;
-          if (id) {
-            historyPush(this.props.modulesManager, this.props.history, "admin.userOverview", [id]);
-          }
-        }
-      });
+  reload = async () => {
+    const { isSaved } = this.state;
+    // eslint-disable-next-line no-shadow
+    const { modulesManager, history, mutation, fetchUserMutation, userId, fetchUser } = this.props;
+
+    if (userId) {
+      try {
+        await fetchUser(modulesManager, userId);
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error(`[RELOAD_USER]: Fetching user details failed. ${error}`);
+      }
+      this.setState((state) => ({ ...state, reset: state.reset + 1 }));
+      return;
     }
+
+    if (isSaved) {
+      try {
+        const { clientMutationId } = mutation;
+        const response = await fetchUserMutation(modulesManager, clientMutationId);
+        const createdUserId = parseData(response.payload.data.mutationLogs)[0].users[0].coreUser.id;
+
+        await fetchUser(modulesManager, createdUserId);
+        historyPush(modulesManager, history, "admin.userOverview", [createdUserId]);
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error(`[RELOAD_USER]: Fetching user details failed. ${error}`);
+      }
+      this.setState((state) => ({ ...state, reset: state.reset + 1 }));
+      return;
+    }
+
+    this.setState(setupState(this.props));
   };
 
   canSave = () => {
@@ -127,6 +156,10 @@ class UserForm extends Component {
         user.lastName &&
         user.otherNames &&
         user.username &&
+        user.email &&
+        this.props.isUserNameValid === true &&
+        this.props.isUserEmailValid === true &&
+        !this.props.isUserEmailFormatInvalid &&
         user.roles?.length &&
         user.districts?.length > 0 &&
         user.language &&
@@ -137,29 +170,25 @@ class UserForm extends Component {
     if (user.password && user.password !== user.confirmPassword) return false;
     // if (user.userTypes?.includes(CLAIM_ADMIN_USER_TYPE) && !user.healthFacility) return false;
     if (user.userTypes?.includes(ENROLMENT_OFFICER_USER_TYPE) && !user.officerVillages) return false;
-
     if (
-      (this.props.obligatory_user_fields?.email == 'M' || (user.userTypes?.includes(ENROLMENT_OFFICER_USER_TYPE) && this.props.obligatory_eo_fields?.email == 'M'))
-      && !user.email) return false;
-    if (
-      (this.props.obligatory_user_fields?.phone == 'M' || (user.userTypes?.includes(ENROLMENT_OFFICER_USER_TYPE) && this.props.obligatory_eo_fields?.phone == 'M'))
-      && !user.phoneNumber) return false;
+      (this.props.obligatory_user_fields?.phone === "M" ||
+        (user.userTypes?.includes(ENROLMENT_OFFICER_USER_TYPE) && this.props.obligatory_eo_fields?.phone === "M")) &&
+      !user.phoneNumber
+    )
+      return false;
 
     return true;
   };
 
   save = (user) => {
-    this.setState({ isLocked: true });
-    this.props.save(user);
+    this.setState({ isLocked: !user?.id, isSaved: true }, this.props.save(user));
   };
 
   onEditedChanged = (user) => {
-    if (!!user.region){
+    if (user.region) {
       user.region.forEach((region) => {
-        this.props.fetchRegionDistricts(region)
+        this.props.fetchRegionDistricts(region);
       });
-    } else {
-      this.props.clearRegionDistricts()
     }
     this.setState({ user });
   };
@@ -181,11 +210,11 @@ class UserForm extends Component {
       add,
       save,
       back,
-      region_districts,
-      obligatory_user_fields,
-      obligatory_eo_fields
+      obligatoryUserFields,
+      obligatoryEoFields,
+      usernameLength,
     } = this.props;
-    const { user } = this.state;
+    const { user, isSaved, reset } = this.state;
 
     if (!rights.includes(RIGHT_USERS)) return null;
 
@@ -194,14 +223,15 @@ class UserForm extends Component {
       modulesManager.getContribs(USER_OVERVIEW_MUTATIONS_KEY).some((mutation) => mutation(state));
 
     const actions = [
-      !userId && {
+      {
         doIt: this.reload,
         icon: <ReplayIcon />,
-        onlyIfDirty: !readOnly && !isInMutation,
+        onlyIfDirty: !readOnly && !isInMutation && !isSaved,
       },
-    ].filter(Boolean);
+    ];
+
     return (
-      <div className={isInMutation ? classes.lockedPage : null}>
+      <div className={isInMutation || !!user?.validityTo ? classes.lockedPage : null}>
         <Helmet title={formatMessageWithValues(this.props.intl, "admin.user", "UserOverview.title", { label: "" })} />
         <ProgressOrError progress={fetchingUser} error={errorUser} />
         {(!userId || user?.id === userId) && (
@@ -210,19 +240,22 @@ class UserForm extends Component {
             title={userId ? "admin.user.UserOverview.title" : "admin.user.UserOverview.newTitle"}
             edited_id={userId}
             edited={user}
+            reset={reset}
             back={back}
             add={add}
+            openDirty={save}
             readOnly={readOnly || isInMutation || user?.validityTo}
             actions={actions}
             HeadPanel={UserMasterPanel}
             Panels={[EnrolmentOfficerFormPanel, ClaimAdministratorFormPanel]}
             user={user}
             onEditedChanged={this.onEditedChanged}
-            canSave={this.canSave}
-            save={save ? this.save : null}
+            canSave={!user.validityTo && this.canSave}
+            save={save && !user.validityTo ? this.save : null}
             onActionToConfirm={this.onActionToConfirm}
-            obligatory_user_fields={obligatory_user_fields}
-            obligatory_eo_fields={obligatory_eo_fields}
+            obligatory_user_fields={obligatoryUserFields}
+            obligatory_eo_fields={obligatoryEoFields}
+            usernameLength={usernameLength}
           />
         )}
       </div>
@@ -240,21 +273,25 @@ const mapStateToProps = (state) => ({
   user: state.admin.user,
   region_districts: state.admin.reg_dst,
   confirmed: state.core.confirmed,
-  obligatory_user_fields: state.admin.obligatory_user_fields,
-  obligatory_eo_fields: state.admin.obligatory_eo_fields
+  obligatoryUserFields: state.admin.obligatory_user_fields,
+  obligatoryEoFields: state.admin.obligatory_eo_fields,
+  isUserNameValid: state.admin.validationFields?.username?.isValid,
+  isUserEmailValid: state.admin.validationFields?.userEmail?.isValid,
+  usernameLength: state.admin?.usernameLength,
+  isUserEmailFormatInvalid: state.admin.validationFields?.userEmailFormat?.isInvalid,
 });
-
 
 const mapDispatchToProps = (dispatch) =>
   bindActionCreators(
     {
       fetchUser,
       createUser,
+      clearUser,
       fetchUserMutation,
       fetchRegionDistricts,
-      clearRegionDistricts,
       fetchObligatoryUserFields,
       fetchObligatoryEnrolmentOfficerFields,
+      fetchUsernameLength,
       journalize,
       coreConfirm,
     },

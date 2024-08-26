@@ -7,9 +7,7 @@ import {
   prepareMutation,
   graphqlWithVariables,
   fetchMutation,
-  useGraphqlQuery
 } from "@openimis/fe-core";
-import _ from "lodash";
 import { mapUserValuesToInput } from "./utils";
 
 const USER_SUMMARY_PROJECTION = [
@@ -18,8 +16,10 @@ const USER_SUMMARY_PROJECTION = [
   "officer{id,dob,phone,lastName,otherNames,email}",
   "iUser{id,phone,lastName,otherNames,email,roles{id,name}}",
   "claimAdmin{id,phone,lastName,otherNames,emailId,dob}",
+  "validityTo",
   "clientMutationId",
 ];
+const DISTRICT_DATA_FETCH_PARAMS = "id, uuid, code, name, parent { id, uuid, name, code }";
 
 export const USER_PICKER_PROJECTION = ["id", "username", "iUser{id otherNames lastName}"];
 
@@ -53,7 +53,7 @@ export function fetchEnrolmentOfficers(mm, variables) {
               code
               lastName
               otherNames
-              
+
             }
           }
           pageInfo {
@@ -64,6 +64,28 @@ export function fetchEnrolmentOfficers(mm, variables) {
     `,
     variables,
     "ADMIN_ENROLMENT_OFFICERS",
+  );
+}
+
+export function fetchSubstitutionEnrolmentOfficers(mm, variables) {
+  return graphqlWithVariables(
+    `
+      query SubstitutionEnrolmentOfficers ($str: String, $villagesUuids: [String!], $officerUuid: String) {
+        substitutionEnrolmentOfficers(str: $str, villagesUuids: $villagesUuids, officerUuid: $officerUuid) {
+          edges {
+            node {
+              id
+              uuid
+              code
+              lastName
+              otherNames
+            }
+          }
+        }
+      }
+    `,
+    variables,
+    "ADMIN_SUBSTITUTION_ENROLMENT_OFFICERS",
   );
 }
 
@@ -137,6 +159,7 @@ export function fetchUser(mm, userId, clientMutationId) {
   const filters = [];
   if (userId) {
     filters.push(`id: "${decodeId(userId)}"`);
+    filters.push("showDeleted: true");
   } else if (clientMutationId) {
     filters.push(`clientMutationId: "${clientMutationId}"`);
   }
@@ -150,8 +173,10 @@ export function fetchUser(mm, userId, clientMutationId) {
             clientMutationId
             id
             username
+            validityTo
             officer {
               id
+              uuid
               hasLogin
               phone
               dob
@@ -194,7 +219,7 @@ export function fetchUser(mm, userId, clientMutationId) {
               languageId
               lastName
               otherNames
-              roles { id name }
+              roles { id name isSystem}
               programSet { edges{node{id idProgram nameProgram validityDateFrom}}}
               healthFacility ${mm.getProjection("location.HealthFacilityPicker.projection")}
               validityFrom
@@ -211,7 +236,7 @@ export function fetchUser(mm, userId, clientMutationId) {
               lastName
               otherNames
               healthFacility ${mm.getProjection("location.HealthFacilityPicker.projection")}
-            
+
             }
           }
         }
@@ -238,11 +263,11 @@ export function fetchUserMutation(mm, clientMutationId) {
 }
 
 export function fetchRegionDistricts(parent) {
-  let filters = [`type: "D"`];
+  const filters = [`type: "D"`];
   if (parent) {
     filters.push(`parent_Uuid: "${parent.uuid}"`);
   }
-  let payload = formatPageQuery("locations", filters, [
+  const payload = formatPageQuery("locations", filters, [
     "id",
     "uuid",
     "type",
@@ -257,19 +282,99 @@ export function fetchRegionDistricts(parent) {
   return graphql(payload, `LOCATION_REGION_DISTRICTS`);
 }
 
+export function fetchDataFromDistrict(districtUuids) {
+  const filters = [];
+  if (districtUuids) {
+    filters.push(`parent_Uuid_In: ["${districtUuids.join('", "')}"]`);
+  }
+  const payload = formatPageQuery("locations", filters, [
+    `${DISTRICT_DATA_FETCH_PARAMS}, children { edges {node {${DISTRICT_DATA_FETCH_PARAMS}}}}`,
+  ]);
+  return graphql(payload, `LOCATION_DISTRICT_DATA`);
+}
 
 export function fetchObligatoryUserFields() {
-  let payload = "query userObligatoryFields {userObligatoryFields}"
+  const payload = "query userObligatoryFields {userObligatoryFields}";
   return graphql(payload, `OBLIGTORY_USER_FIELDS`);
 }
 
 export function fetchObligatoryEnrolmentOfficerFields() {
-  let payload = "query userObligatoryFields {eoObligatoryFields}"
+  const payload = "query userObligatoryFields {eoObligatoryFields}";
   return graphql(payload, `OBLIGTORY_EO_FIELDS`);
 }
 
 export function clearRegionDistricts() {
   return (dispatch) => {
     dispatch({ type: `LOCATION_REGION_DISTRICTS_CLEAR` });
+  };
+}
+export function clearDistrictData() {
+  return (dispatch) => {
+    dispatch({ type: `LOCATION_DISTRICT_DATA_CLEAR` });
+  };
+}
+
+export function usernameValidationCheck(mm, variables) {
+  return graphqlWithVariables(
+    `
+    query ($username: String!) {
+      isValid: validateUsername(username: $username)
+    }
+    `,
+    variables,
+    `USERNAME_FIELDS_VALIDATION`,
+  );
+}
+
+export function fetchUsernameLength() {
+  const payload = "query {usernameLength}";
+  return graphql(payload, `USERNAME_LENGTH_FIELDS`);
+}
+
+export function usernameValidationClear() {
+  return (dispatch) => {
+    dispatch({ type: `USERNAME_FIELDS_VALIDATION_CLEAR` });
+  };
+}
+
+export function setUsernameValid() {
+  return (dispatch) => {
+    dispatch({ type: "USERNAME_FIELDS_VALIDATION_SET_VALID" });
+  };
+}
+
+export function clearUser() {
+  return (dispatch) => {
+    dispatch({ type: "ADMIN_USER_OVERVIEW_CLEAR" });
+  };
+}
+
+export function userEmailValidationCheck(mm, variables) {
+  return graphqlWithVariables(
+    `
+    query ($userEmail: String!) {
+      isValid: validateUserEmail(userEmail: $userEmail)
+    }
+    `,
+    variables,
+    `USER_EMAIL_FIELDS_VALIDATION`,
+  );
+}
+
+export function userEmailValidationClear() {
+  return (dispatch) => {
+    dispatch({ type: `USER_EMAIL_FIELDS_VALIDATION_CLEAR` });
+  };
+}
+
+export function setUserEmailValid() {
+  return (dispatch) => {
+    dispatch({ type: "USER_EMAIL_FIELDS_VALIDATION_SET_VALID" });
+  };
+}
+
+export function saveEmailFormatValidity(isFormatInvalid) {
+  return (dispatch) => {
+    dispatch({ type: "USER_EMAIL_FORMAT_VALIDATION_CHECK", payload: { data: { isFormatInvalid } } });
   };
 }
