@@ -220,6 +220,7 @@ export function fetchUser(mm, userId, clientMutationId) {
               lastName
               otherNames
               roles { id name isSystem}
+              programSet { edges{node{id idProgram nameProgram validityDateFrom}}}
               healthFacility ${mm.getProjection("location.HealthFacilityPicker.projection")}
               validityFrom
               validityTo
@@ -262,7 +263,7 @@ export function fetchUserMutation(mm, clientMutationId) {
 }
 
 export function fetchRegionDistricts(parent) {
-  const filters = [`type: "D"`];
+  let filters = [`type: "D"`];
   if (parent) {
     filters.push(`parent_Uuid: "${parent.uuid}"`);
   }

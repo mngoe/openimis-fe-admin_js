@@ -12,6 +12,8 @@ import {
   People,
   PinDrop,
   Tune,
+  FormatAlignLeft,
+  AccountBox
 } from "@material-ui/icons";
 import { formatMessage, MainMenuContribution, withModulesManager } from "@openimis/fe-core";
 import {
@@ -23,7 +25,9 @@ import {
   RIGHT_MEDICALITEMS,
   // RIGHT_ENROLMENTOFFICER,
   // RIGHT_CLAIMADMINISTRATOR,
+ RIGHT_USER_EDIT,
   RIGHT_USERS,
+  RIGHT_PROGRAMS,
   RIGHT_LOCATIONS,
 } from "../constants";
 
@@ -79,6 +83,13 @@ class AdminMainMenu extends Component {
         text: formatMessage(this.props.intl, "admin", "menu.healthFacilities"),
         icon: <LocalHospital />,
         route: "/location/healthFacilities",
+      });
+    }
+    if (rights.includes(RIGHT_PROGRAMS)) {
+      entries.push({
+        text: formatMessage(this.props.intl, "admin", "menu.programs"),
+        icon: <FormatAlignLeft />,
+        route: "/program/programs",
         withDivider: true,
       });
     }
@@ -127,11 +138,19 @@ class AdminMainMenu extends Component {
       });
     }
 
-    entries.push(
-      ...this.props.modulesManager
-        .getContribs(ADMIN_MAIN_MENU_CONTRIBUTION_KEY)
-        .filter((c) => !c.filter || c.filter(rights)),
-    );
+    if (rights.includes(RIGHT_USERS)) {
+      entries.push({
+        text: formatMessage(this.props.intl, "core", "roleManagement.label"),
+        icon: <AccountBox />,
+        route: "/roles",
+      });
+    }
+
+    // entries.push(
+    //   ...this.props.modulesManager
+    //     .getContribs(ADMIN_MAIN_MENU_CONTRIBUTION_KEY)
+    //     .filter((c) => !c.filter || c.filter(rights)),
+    // );
 
     if (!entries.length) return null;
     return (
