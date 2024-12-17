@@ -62,7 +62,6 @@ const UserMasterPanel = (props) => {
   } = props;
   const { formatMessage } = useTranslations("admin", modulesManager);
 
-  console.log(edited);
     const dispatch = useDispatch();
   const renderLastNameFirst = modulesManager.getConf(
     "fe-insuree",
