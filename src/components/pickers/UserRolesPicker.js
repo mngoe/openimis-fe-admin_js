@@ -23,7 +23,7 @@ const UserRolesPicker = ({
       role(str: $str) {
         edges {
           node {
-            id name
+            id name isSystem
           }
         }
       }
@@ -31,6 +31,9 @@ const UserRolesPicker = ({
   `,
     { str: searchString },
   );
+
+  const roles = data?.role?.edges.map((edge) => edge.node) ?? [];
+  const uniqueValues = [...new Map(value?.map((role) => [role.id, role])).values()];
 
   return (
     <Autocomplete
@@ -42,14 +45,14 @@ const UserRolesPicker = ({
       withLabel={withLabel}
       withPlaceholder={withPlaceholder}
       readOnly={readOnly}
-      options={data?.role?.edges.map((edge) => edge.node) ?? []}
+      options={roles}
       isLoading={isLoading}
-      value={value}
+      value={uniqueValues}
       getOptionLabel={(o) => o?.name}
       onChange={(option) => onChange(option, option?.name)}
       filterOptions={filterOptions}
       filterSelectedOptions={filterSelectedOptions}
-      onInputChange={setSearchString}
+      onInputChange={() => setSearchString(searchString)}
     />
   );
 };
