@@ -44,7 +44,6 @@ class AdminMainMenu extends Component {
     const { rights } = this.props;
     const entries = [];
 
-    // Ajout des nouvelles entrées pour Specialités et Prescripteurs
     if (!!rights.filter((r) => r >= RIGHT_CLAIMREVIEW && r <= RIGHT_PROCESS).length) {
       entries.push({
         text: formatMessage(this.props.intl, "claim", "menu.specialities"),
