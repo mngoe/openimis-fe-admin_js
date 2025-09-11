@@ -12,6 +12,8 @@ import {
   People,
   PinDrop,
   Tune,
+  MedicalServices,
+  Description,
 } from "@material-ui/icons";
 import { formatMessage, MainMenuContribution, withModulesManager } from "@openimis/fe-core";
 import {
@@ -23,6 +25,8 @@ import {
   RIGHT_MEDICALITEMS,
   // RIGHT_ENROLMENTOFFICER,
   // RIGHT_CLAIMADMINISTRATOR,
+  RIGHT_CLAIMREVIEW,
+  RIGHT_PROCESS,
   RIGHT_USERS,
   RIGHT_LOCATIONS,
 } from "../constants";
@@ -39,6 +43,22 @@ class AdminMainMenu extends Component {
   render() {
     const { rights } = this.props;
     const entries = [];
+
+    // Ajout des nouvelles entrées pour Specialités et Prescripteurs
+    if (!!rights.filter((r) => r >= RIGHT_CLAIMREVIEW && r <= RIGHT_PROCESS).length) {
+      entries.push({
+        text: formatMessage(this.props.intl, "claim", "menu.specialities"),
+        icon: <Healing />,
+        route: "/claim/specialities",
+      });
+    }
+    if (!!rights.filter((r) => r >= RIGHT_CLAIMREVIEW && r <= RIGHT_PROCESS).length) {
+      entries.push({
+        text: formatMessage(this.props.intl, "claim", "menu.prescribers"),
+        icon: <Person />,
+        route: "/claim/prescribers",
+      });
+    }
 
     if (this.isWorker) {
       if (rights.includes(RIGHT_USERS)) {
