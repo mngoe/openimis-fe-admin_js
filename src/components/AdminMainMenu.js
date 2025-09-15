@@ -12,6 +12,8 @@ import {
   People,
   PinDrop,
   Tune,
+  MedicalServices,
+  Description,
 } from "@material-ui/icons";
 import { formatMessage, MainMenuContribution, withModulesManager } from "@openimis/fe-core";
 import {
@@ -39,6 +41,21 @@ class AdminMainMenu extends Component {
   render() {
     const { rights } = this.props;
     const entries = [];
+
+    if (rights.includes(RIGHT_USERS)) {
+      entries.push({
+        text: formatMessage(this.props.intl, "claim", "menu.specialities"),
+        icon: <Healing />,
+        route: "/claim/specialities",
+      });
+    }
+    if (rights.includes(RIGHT_USERS)) {
+      entries.push({
+        text: formatMessage(this.props.intl, "claim", "menu.prescribers"),
+        icon: <Person />,
+        route: "/claim/prescribers",
+      });
+    }
 
     if (this.isWorker) {
       if (rights.includes(RIGHT_USERS)) {
