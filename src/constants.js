@@ -8,6 +8,7 @@ export const RIGHT_ENROLMENTOFFICER = 121501;
 export const RIGHT_CLAIMADMINISTRATOR = 121601;
 export const RIGHT_PAYERS = 121801;
 export const RIGHT_LOCATIONS = 121901;
+export const RIGHT_CACHE = 101011;
 
 export const RIGHT_USERS = 121701;
 export const RIGHT_USER_SEARCH = 121701;
