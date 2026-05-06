@@ -30,6 +30,7 @@ import {
   RIGHT_USERS,
   RIGHT_PROGRAMS,
   RIGHT_LOCATIONS,
+  RIGHT_CACHE,
 } from "../constants";
 
 const ADMIN_MAIN_MENU_CONTRIBUTION_KEY = "admin.MainMenu";
@@ -147,11 +148,13 @@ class AdminMainMenu extends Component {
         withDivider: true,
       });
     }
-    entries.push({
-      text: formatMessage(this.props.intl, "cache", "menu.cachedashboard"),
-      icon: <DataUsage />,
-      route: "/cache/dashboard"
-    });
+    if (rights.includes(RIGHT_CACHE)) {
+      entries.push({
+        text: formatMessage(this.props.intl, "cache", "menu.cachedashboard"),
+        icon: <DataUsage />,
+        route: "/cache/dashboard"
+      });
+    }
 
     // entries.push(
     //   ...this.props.modulesManager
