@@ -238,6 +238,19 @@ export function fetchUser(mm, userId, clientMutationId) {
               healthFacility ${mm.getProjection("location.HealthFacilityPicker.projection")}
 
             }
+            businessAccesses {
+              edges {
+                node {
+                  id
+                  uuid
+                  linkType
+                  linkTypeLabel
+                  businessObjectModel
+                  objectId
+                  active
+                }
+              }
+            }
           }
         }
       }

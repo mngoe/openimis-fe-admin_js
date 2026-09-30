@@ -14,7 +14,8 @@ import {
   PublishedComponent,
   ValidatedTextInput,
 } from "@openimis/fe-core";
-import { CLAIM_ADMIN_USER_TYPE, ENROLMENT_OFFICER_USER_TYPE, EMAIL_REGEX_PATTERN, DEFAULT } from "../constants";
+import { EMAIL_REGEX_PATTERN, DEFAULT } from "../constants";
+import { hasUBA } from "../utils";
 import {
   usernameValidationCheck,
   usernameValidationClear,
@@ -62,7 +63,6 @@ const UserMasterPanel = (props) => {
   } = props;
   const { formatMessage } = useTranslations("admin", modulesManager);
 
-  console.log(edited);
   const dispatch = useDispatch();
   const renderLastNameFirst = modulesManager.getConf(
     "fe-insuree",
@@ -181,7 +181,7 @@ const UserMasterPanel = (props) => {
       )}
       {!(
         obligatoryUserFields?.email == "H" ||
-        (edited.userTypes?.includes(ENROLMENT_OFFICER_USER_TYPE) && obligatoryEOFields?.email == "H")
+        (hasUBA(edited) && obligatoryEOFields?.email == "H")
       ) && (
         <Grid item xs={4} className={classes.item}>
           <ValidatedTextInput
@@ -207,7 +207,7 @@ const UserMasterPanel = (props) => {
       )}
       {!(
         obligatoryUserFields?.phone == "H" ||
-        (edited.userTypes?.includes(ENROLMENT_OFFICER_USER_TYPE) && obligatoryEOFields?.phone == "H")
+        (hasUBA(edited) && obligatoryEOFields?.phone == "H")
       ) && (
           <Grid item xs={4} className={classes.item}>
             <TextInput
@@ -216,7 +216,7 @@ const UserMasterPanel = (props) => {
               label="user.phone"
               required={
                 obligatoryUserFields?.phone == "M" ||
-                (edited.userTypes?.includes(ENROLMENT_OFFICER_USER_TYPE) && obligatoryEOFields?.phone == "M")
+                (hasUBA(edited) && obligatoryEOFields?.phone == "M")
               }
               readOnly={readOnly}
               value={edited?.phoneNumber ?? ""}
@@ -226,16 +226,25 @@ const UserMasterPanel = (props) => {
         )}
       <Grid item xs={4} className={classes.item}>
         <PublishedComponent
+          pubRef="core.DatePicker"
+          value={edited?.birthDate ?? null}
+          module="admin"
+          label="user.dob"
+          readOnly={readOnly}
+          maxDate={new Date()}
+          onChange={(birthDate) => onEditedChanged({ ...edited, birthDate })}
+        />
+      </Grid>
+      <Grid item xs={4} className={classes.item}>
+        <PublishedComponent
           pubRef="location.HealthFacilityPicker"
           value={edited?.healthFacility}
           district={edited.districts}
           module="admin"
           readOnly={readOnly}
-          required={false
-            // edited.userTypes.includes(
-            //   CLAIM_ADMIN_USER_TYPE,
-            // ) /* This field is also present in the claim administrator panel */
-          }
+          // the health facility of the interactive user, used by the location filters.
+          // Being the claim administrator of a facility is a business access instead.
+          required={false}
           onChange={(healthFacility) => onEditedChanged({ ...edited, healthFacility })}
         />
       </Grid>

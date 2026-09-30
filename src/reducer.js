@@ -7,7 +7,7 @@ import {
   dispatchMutationErr,
   dispatchMutationReq,
 } from "@openimis/fe-core";
-import { checkRolesAndGetUserTypes, mapQueriesUserToStore } from "./utils";
+import { mapQueriesUserToStore } from "./utils";
 
 function reducer(
   state = {
@@ -126,10 +126,7 @@ function reducer(
           ...state.users,
           isFetching: false,
           fetched: action.meta,
-          items: parseData(action.payload.data.users).map((user) => ({
-            ...user,
-            userTypes: checkRolesAndGetUserTypes(user),
-          })),
+          items: parseData(action.payload.data.users),
           error: formatGraphQLError(action.payload),
         },
       };
