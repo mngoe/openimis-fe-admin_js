@@ -18,9 +18,9 @@ import {
   coreConfirm,
   parseData,
 } from "@openimis/fe-core";
-import { CLAIM_ADMIN_USER_TYPE, ENROLMENT_OFFICER_USER_TYPE, INTERACTIVE_USER_TYPE, RIGHT_USERS } from "../constants";
-import EnrolmentOfficerFormPanel from "./EnrolmentOfficerFormPanel";
-import ClaimAdministratorFormPanel from "./ClaimAdministratorFormPanel";
+import { INTERACTIVE_USER_TYPE, RIGHT_USERS } from "../constants";
+import UserBusinessAccessesPanel from "./UserBusinessAccessesPanel";
+import { isBusinessAccessComplete, hasUBA } from "../utils";
 import {
   fetchUser,
   createUser,
@@ -44,6 +44,7 @@ const setupState = (props) => ({
   user: !props?.userId
     ? {
         userTypes: [INTERACTIVE_USER_TYPE],
+        businessAccesses: [],
       }
     : props.user,
   isSaved: false,
@@ -168,11 +169,13 @@ class UserForm extends Component {
     )
       return false;
     if (user.password && user.password !== user.confirmPassword) return false;
-    // if (user.userTypes?.includes(CLAIM_ADMIN_USER_TYPE) && !user.healthFacility) return false;
-    if (user.userTypes?.includes(ENROLMENT_OFFICER_USER_TYPE) && !user.officerVillages) return false;
+    // a business access row is only saveable once it names a credential and an object
+    if (user.businessAccesses?.some((businessAccess) => !isBusinessAccessComplete(businessAccess))) return false;
     if (
       (this.props.obligatory_user_fields?.phone === "M" ||
-        (user.userTypes?.includes(ENROLMENT_OFFICER_USER_TYPE) && this.props.obligatory_eo_fields?.phone === "M")) &&
+        // the rules a deployment configures for a linked user apply as soon as the user
+        // holds a business access, whichever credential it carries
+        (hasUBA(user) && this.props.obligatory_eo_fields?.phone === "M")) &&
       !user.phoneNumber
     )
       return false;
@@ -247,7 +250,7 @@ class UserForm extends Component {
             readOnly={readOnly || isInMutation || user?.validityTo}
             actions={actions}
             HeadPanel={UserMasterPanel}
-            Panels={[EnrolmentOfficerFormPanel, ClaimAdministratorFormPanel]}
+            Panels={[UserBusinessAccessesPanel]}
             user={user}
             onEditedChanged={this.onEditedChanged}
             canSave={!user.validityTo && this.canSave}

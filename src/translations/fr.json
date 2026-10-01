@@ -13,5 +13,11 @@
     "admin.menu.enrollmentOfficers": "Agents d'inscription",
     "admin.menu.claimAdministrators": "Administrateurs des prestations",
     "admin.menu.payers": "Payeurs",
-    "admin.menu.locations": "Sites"
+    "admin.menu.locations": "Sites",
+    "admin.UserBusinessAccessesPanel.title": "Accès métier",
+    "admin.UserBusinessAccessesPanel.hint": "Ce sur quoi cet utilisateur peut agir : la qualité en laquelle il est rattaché à chaque objet. Un administrateur de soins est un utilisateur rattaché à un établissement, un agent d'enrôlement un utilisateur rattaché à des villages. Les droits viennent toujours des rôles, ceux marqués comme droits d'accès métier ne s'appliquant que là où un tel rattachement existe.",
+    "admin.UserBusinessAccessesPanel.table.linkType": "Qualité",
+    "admin.UserBusinessAccessesPanel.table.businessObject": "Objet",
+    "admin.UserBusinessAccessesPanel.table.newRow": "Ajouter un accès",
+    "admin.user.dob": "Date de naissance"
 }

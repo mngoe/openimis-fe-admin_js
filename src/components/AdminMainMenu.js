@@ -15,7 +15,7 @@ import {
   FormatAlignLeft,
   AccountBox
 } from "@material-ui/icons";
-import { formatMessage, MainMenuContribution, withModulesManager } from "@openimis/fe-core";
+import { formatMessage, hasPermsAnywhere, MainMenuContribution, withModulesManager } from "@openimis/fe-core";
 import {
   RIGHT_PRODUCTS,
   RIGHT_HEALTHFACILITIES,
@@ -40,12 +40,19 @@ class AdminMainMenu extends Component {
     this.isWorker = props.modulesManager.getConf("fe-core", "isWorker", false);
   }
 
+  /**
+   * A menu entry is a navigation level gate: a right the user only holds on the business
+   * objects they are linked to (RoleRight.uba) still has to open its page, which is then
+   * responsible for checking each action against the object at hand.
+   */
+  mayReach = (right) => hasPermsAnywhere(right, { rights: this.props.rights });
+
   render() {
     const { rights } = this.props;
     const entries = [];
 
     if (this.isWorker) {
-      if (rights.includes(RIGHT_USERS)) {
+      if (this.mayReach(RIGHT_USERS)) {
         entries.push({
           text: formatMessage(this.props.intl, "admin", "menu.users"),
           icon: <Person />,
@@ -71,21 +78,21 @@ class AdminMainMenu extends Component {
       );
     }
 
-    if (rights.includes(RIGHT_PRODUCTS)) {
+    if (this.mayReach(RIGHT_PRODUCTS)) {
       entries.push({
         text: formatMessage(this.props.intl, "admin", "menu.products"),
         icon: <Tune />,
         route: "/admin/products",
       });
     }
-    if (rights.includes(RIGHT_HEALTHFACILITIES)) {
+    if (this.mayReach(RIGHT_HEALTHFACILITIES)) {
       entries.push({
         text: formatMessage(this.props.intl, "admin", "menu.healthFacilities"),
         icon: <LocalHospital />,
         route: "/location/healthFacilities",
       });
     }
-    if (rights.includes(RIGHT_PROGRAMS)) {
+    if (this.mayReach(RIGHT_PROGRAMS)) {
       entries.push({
         text: formatMessage(this.props.intl, "admin", "menu.programs"),
         icon: <FormatAlignLeft />,
@@ -93,14 +100,14 @@ class AdminMainMenu extends Component {
         withDivider: true,
       });
     }
-    if (rights.includes(RIGHT_PRICELISTMS)) {
+    if (this.mayReach(RIGHT_PRICELISTMS)) {
       entries.push({
         text: formatMessage(this.props.intl, "admin", "menu.medicalServicesPrices"),
         icon: <HealingOutlined />,
         route: "/medical/pricelists/services",
       });
     }
-    if (rights.includes(RIGHT_PRICELISTMI)) {
+    if (this.mayReach(RIGHT_PRICELISTMI)) {
       entries.push({
         text: formatMessage(this.props.intl, "admin", "menu.medicalItemsPrices"),
         icon: <LocalPharmacyOutlined />,
@@ -108,14 +115,14 @@ class AdminMainMenu extends Component {
         withDivider: true,
       });
     }
-    if (rights.includes(RIGHT_MEDICALSERVICES)) {
+    if (this.mayReach(RIGHT_MEDICALSERVICES)) {
       entries.push({
         text: formatMessage(this.props.intl, "admin", "menu.medicalServices"),
         icon: <Healing />,
         route: "/medical/medicalServices",
       });
     }
-    if (rights.includes(RIGHT_MEDICALITEMS)) {
+    if (this.mayReach(RIGHT_MEDICALITEMS)) {
       entries.push({
         text: formatMessage(this.props.intl, "admin", "menu.medicalItems"),
         icon: <LocalPharmacy />,
@@ -123,14 +130,14 @@ class AdminMainMenu extends Component {
         withDivider: true,
       });
     }
-    if (rights.includes(RIGHT_USERS)) {
+    if (this.mayReach(RIGHT_USERS)) {
       entries.push({
         text: formatMessage(this.props.intl, "admin", "menu.users"),
         icon: <Person />,
         route: "/admin/users",
       });
     }
-    if (rights.includes(RIGHT_LOCATIONS)) {
+    if (this.mayReach(RIGHT_LOCATIONS)) {
       entries.push({
         text: formatMessage(this.props.intl, "admin", "menu.locations"),
         icon: <PinDrop />,
@@ -138,7 +145,7 @@ class AdminMainMenu extends Component {
       });
     }
 
-    if (rights.includes(RIGHT_USERS)) {
+    if (this.mayReach(RIGHT_USERS)) {
       entries.push({
         text: formatMessage(this.props.intl, "core", "roleManagement.label"),
         icon: <AccountBox />,

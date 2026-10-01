@@ -20,10 +20,14 @@ export const RIGHT_PROGRAM_DELETE = 121701;
 export const RIGHT_PROGRAM_ADD = 121702;
 
 export const INTERACTIVE_USER_TYPE = "INTERACTIVE";
+
+// Nothing about the User Business Access credentials is declared here: the codes, their
+// labels and the '<app_label>.<model>' they may be used on come from the backend registry
+// (`useUbaLinkTypes` in @openimis/fe-core, the `ubaLinkTypes` query), and which picker
+// selects an object of a given type from the business object registry of the core module.
+
 export const ENROLMENT_OFFICER_USER_TYPE = "OFFICER";
-export const OFFICER_ROLE_IS_SYSTEM = 1;
 export const CLAIM_ADMIN_USER_TYPE = "CLAIM_ADMIN";
-export const CLAIM_ADMIN_IS_SYSTEM = 256;
 export const MODULE_NAME = "user";
 
 export const DEFAULT = {
