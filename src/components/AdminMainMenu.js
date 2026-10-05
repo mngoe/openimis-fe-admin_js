@@ -13,7 +13,8 @@ import {
   PinDrop,
   Tune,
   FormatAlignLeft,
-  AccountBox
+  AccountBox,
+  DataUsage
 } from "@material-ui/icons";
 import { formatMessage, MainMenuContribution, withModulesManager } from "@openimis/fe-core";
 import {
@@ -144,6 +145,14 @@ class AdminMainMenu extends Component {
         text: formatMessage(this.props.intl, "core", "roleManagement.label"),
         icon: <AccountBox />,
         route: "/roles",
+        withDivider: true,
+      });
+    }
+    if (rights.includes(RIGHT_CACHE)) {
+      entries.push({
+        text: formatMessage(this.props.intl, "cache", "menu.cachedashboard"),
+        icon: <DataUsage />,
+        route: "/cache/dashboard"
       });
     }
     if (rights.includes(RIGHT_CACHE)) {
