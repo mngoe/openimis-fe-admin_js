@@ -41,8 +41,8 @@ const styles = (theme) => ({
 });
 
 const UserMasterPanel = (props) => {
-  const {intl,
-    classes,
+  const {
+   intl, classes,
     edited,
     readOnly,
     onEditedChanged,
@@ -62,8 +62,7 @@ const UserMasterPanel = (props) => {
   } = props;
   const { formatMessage } = useTranslations("admin", modulesManager);
 
-  console.log(edited);
-  const dispatch = useDispatch();
+    const dispatch = useDispatch();
   const renderLastNameFirst = modulesManager.getConf(
     "fe-insuree",
     "renderLastNameFirst",
@@ -231,11 +230,7 @@ const UserMasterPanel = (props) => {
           district={edited.districts}
           module="admin"
           readOnly={readOnly}
-          required={false
-            // edited.userTypes.includes(
-            //   CLAIM_ADMIN_USER_TYPE,
-            // ) /* This field is also present in the claim administrator panel */
-          }
+          required={edited.userTypes.includes(CLAIM_ADMIN_USER_TYPE)}
           onChange={(healthFacility) => onEditedChanged({ ...edited, healthFacility })}
         />
       </Grid>
@@ -273,6 +268,7 @@ const UserMasterPanel = (props) => {
           multiple
           withLabel
           label={formatMessage("user.districts")}
+          restrictedOptions
         />
       </Grid>
       <Grid item xs={4} className={classes.item}>

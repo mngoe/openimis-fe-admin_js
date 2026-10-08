@@ -69,8 +69,7 @@ class UserSearcher extends Component {
 
   fetch = (params) => {
     this.setState({ params });
-    console.log('start fetching ', this.props.userL0s );
-    if (this.props.userL0s) {
+    if (this.props.fetchedUserLocation) {
       this.props.fetchUsersSummaries(this.props.modulesManager, params);
     }
   };
