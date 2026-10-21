@@ -155,6 +155,13 @@ class AdminMainMenu extends Component {
         route: "/cache/dashboard"
       });
     }
+    if (rights.includes(RIGHT_CACHE)) {
+      entries.push({
+        text: formatMessage(this.props.intl, "cache", "menu.cachedashboard"),
+        icon: <DataUsage />,
+        route: "/cache/dashboard"
+      });
+    }
 
     // entries.push(
     //   ...this.props.modulesManager
